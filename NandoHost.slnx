@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/NandoHost.App/NandoHost.App.csproj" />
+    <Project Path="src/NandoHost.Core/NandoHost.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NandoHost.Tests/NandoHost.Tests.csproj" />
+  </Folder>
+</Solution>

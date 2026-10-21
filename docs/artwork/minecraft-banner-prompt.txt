@@ -1,0 +1,8 @@
+Mode: built-in image_gen.imagegen (new image generation)
+Use case: stylized-concept.
+Asset type: original panoramic background banner for the NandoHost desktop Minecraft Java server manager.
+
+Generate a new image, not an interface screenshot. Primary request: a scene that feels recognizably like a beautiful Minecraft world rendered in-game, nostalgic but polished. Panoramic 3:1 composition, approximately 2304x768. Dense cubic oak trees with pixelated leaf blocks, terraced grass and dirt blocks with crisp 16x16-style pixel textures, a winding blue river, a small cozy wooden survival cabin on the RIGHT third, distant blocky hills, warm sunrise rays and soft atmospheric depth. Preserve visibly cubic geometry and authentic voxel proportions; detailed pixel textures and natural game lighting, not flat vector art, not smooth low-poly triangular geometry, not a toy diorama. Camera at human eye height looking over a river valley. The left 40 percent should be a quieter shaded forest or shaded grassy bank with low contrast, so the app can overlay white headings there. Place the cabin and the main sunlit scenery in the middle-to-right region and within the middle vertical third to remain readable when cropped into a shallow banner. Palette: grass green, warm oak brown, clear river blue, golden sunlight, calm inviting mood. No text, no lettering, no logos, no HUD, no borders, no interface panels, no watermark, no people. Opaque background.
+
+Saved asset: source/NandoHost.App/Assets/Images/minecraft-valley.png
+Text is rendered by the application, not baked into the image.

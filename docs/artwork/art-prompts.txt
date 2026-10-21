@@ -1,0 +1,13 @@
+Mode: built-in image_gen; new original artwork.
+Final assets bundled with NandoHost 0.8.9:
+[Caminho local original omitido; veja src/NandoHost.App/Assets/Images.]
+[Caminho local original omitido; veja src/NandoHost.App/Assets/Images.]
+[Caminho local original omitido; veja src/NandoHost.App/Assets/Images.]
+
+forest: Use case: stylized-concept. Asset type: wide 3:1 background illustration for a native Terraria server management application. Create original carefully hand-crafted 2D pixel art inspired by Terraria's classic main menu: brilliant cobalt and cornflower blue sky, soft tiny pixel clouds, layered teal distant mountains and tall slender evergreen forest, a grassy dirt platform at the bottom with small sunflowers and a single small timber starter cabin near the RIGHT edge, daylight adventure atmosphere. Authentic low resolution game sprites with crisp deliberate pixel clusters, limited cohesive palette, no Minecraft cubes, no voxel or 3D rendering, no painterly AI haze. Broad panoramic environment; left third mainly dark teal evergreen silhouettes so white interface copy can be placed later. NO text, letters, logos, UI, borders or watermarks. Landscape approximately 1536x512.
+
+calamity: Use case: stylized-concept. Asset type: wide 3:1 game host banner. Original 2D dark fantasy pixel art inspired by the mood of Terraria Calamity: distant layered wine red evergreen forest, amber dusk sky, tiny golden sun right of center, craggy black crimson mountain on the far right with a small ominous red crystal torch. Atmospheric hand-crafted pixel clusters, readable silhouettes, coherent limited palette of charcoal plum, deep burgundy, rust red and pale gold. Panoramic landscape. Left third dark empty forest silhouettes for future white interface text. No characters, no logos, no text, no game menu, no UI, no watermarks. NOT 3D, not voxel, no Minecraft blocks. approximately1536x512.
+
+icon: Use case: logo-brand. Asset type: small game selection icon for a native Terraria hosting app. A charming original 2D pixel art tree symbol: strong curved brown trunk with exposed roots, round vibrant green leafy crown in three clumps and a tiny moss-covered dirt patch. Inspired by Terraria's classic tree emblem, carefully drawn game sprite aesthetic, bold dark outline with clear chunky pixel clusters, limited greens and warm browns, recognizable at 32 pixels. Centered single icon filling most of a square canvas. Flat front view, no perspective, no 3D, no gamepad, no computer, NO words, letters or initials, no shadow outside silhouette, no decorative frame. Genuine transparent background.
+
+New sky asset prompts: sky-prompts.txt.
