@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.App;
 
@@ -17,9 +18,9 @@ public partial class MainWindow
         string Count(string game)
         {
             var count = profiles.Count(p => p.Game == game);
-            return count == 1 ? "1 servidor" : count + " servidores";
+            return count == 1 ? Tr("1 servidor") : count + Tr(" servidores");
         }
-        MinecraftCoverCount.Text = Count("Minecraft"); TerrariaCoverCount.Text = Count("Terraria");
+        LocalizedUi.Set(MinecraftCoverCount, "Text", () => Count("Minecraft")); LocalizedUi.Set(TerrariaCoverCount, "Text", () => Count("Terraria"));
         HomeServersEmpty.Visibility = profiles.Any(p => p.Game == homeGame) ? Visibility.Collapsed : Visibility.Visible;
         foreach (var card in new[] { MinecraftCover, TerrariaCover })
             card.BorderBrush = (Brush)new BrushConverter().ConvertFromString((string)card.Tag == homeGame ? "#D7B27A" : "#30444F")!;

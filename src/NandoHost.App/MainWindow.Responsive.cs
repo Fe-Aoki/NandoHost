@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.App;
 
@@ -48,8 +49,8 @@ public partial class MainWindow
         var minimum = HeroRow.Height.Value + Math.Max(stackActions ? 130 : 78, ActionRow.DesiredSize.Height)
             + Math.Max(116, MetricsCards.DesiredSize.Height) + ConsolePanel.MinHeight + 4;
         OverviewContent.Height = Math.Max(minimum, OverviewScroll.ActualHeight);
-        MaximizeButton.Content = WindowState == WindowState.Maximized ? "❐" : "□";
-        MaximizeButton.ToolTip = WindowState == WindowState.Maximized ? "Restaurar janela" : "Maximizar";
+        LocalizedUi.Set(MaximizeButton, "Content", () => WindowState == WindowState.Maximized ? "❐" : "□");
+        LocalizedUi.Set(MaximizeButton, "ToolTip", () => WindowState == WindowState.Maximized ? Tr("Restaurar janela") : Tr("Maximizar"));
     }
 
     internal string PreviewResizeChecks()

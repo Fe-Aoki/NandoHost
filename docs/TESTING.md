@@ -27,3 +27,7 @@ Verificações adicionais: `--home-check`, `--library-check`, `--resize-check`, 
 O executável de testes reconhece `--online`, `--editions-online`, `--terraria-live`, `--tml-live`, `--example-mod` e `--agent-path`. Esses modos podem baixar arquivos, executar servidores reais, consumir rede e ocupar portas locais. Não fazem parte do teste padrão.
 
 Para testar um jogo real, use uma pasta temporária nova como primeiro argumento do executável de testes, nunca uma pasta de servidores em uso. Consulte os blocos correspondentes de `tests/NandoHost.Tests/Program.cs` antes de executar. Não envie os dados gerados para o Git.
+
+## Idioma
+
+Use --language-check para alternar nos dois sentidos sem perder campos e comandos. --language en-US ou --language pt-BR seleciona o idioma da captura final. Esses argumentos funcionam apenas no modo de prévia.

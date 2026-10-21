@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.Core;
 
@@ -18,7 +19,7 @@ internal sealed class WindowsGameConsole : IDisposable
     public static WindowsGameConsole Start(string executable, string[] arguments, string directory)
     {
         if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763))
-            throw new PlatformNotSupportedException("O console Terraria exige Windows 10 1809 ou superior.");
+            throw new PlatformNotSupportedException(Tr("O console Terraria exige Windows 10 1809 ou superior."));
         var instance = new WindowsGameConsole();
         IntPtr inputRead = IntPtr.Zero, inputWrite = IntPtr.Zero, outputRead = IntPtr.Zero, outputWrite = IntPtr.Zero;
         IntPtr attributes = IntPtr.Zero;

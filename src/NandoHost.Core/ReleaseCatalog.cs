@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.Core;
 
@@ -43,8 +44,8 @@ public sealed class ReleaseCatalog(Downloads downloads)
                 versions = compatible;
             }
         }
-        else throw new InvalidDataException("Edição desconhecida.");
-        if (versions.Count == 0) throw new InvalidDataException("Nenhuma versão compatível foi encontrada no catálogo oficial.");
+        else throw new InvalidDataException(Tr("Edição desconhecida."));
+        if (versions.Count == 0) throw new InvalidDataException(Tr("Nenhuma versão compatível foi encontrada no catálogo oficial."));
         ct.ThrowIfCancellationRequested(); cache[edition] = versions;
         return [.. versions];
     }
@@ -58,7 +59,7 @@ public sealed class ReleaseCatalog(Downloads downloads)
             var url = link.GetProperty("downloadUrl").GetString()!;
             Downloads.ValidateUri(new Uri(url));
             var match = Regex.Match(new Uri(url).AbsolutePath, @"/bedrock-server-(?<version>[0-9]+(?:\.[0-9]+){2,3})\.zip$");
-            if (!match.Success || new Uri(url).Host != "www.minecraft.net") throw new InvalidDataException("Link Bedrock inválido.");
+            if (!match.Success || new Uri(url).Host != "www.minecraft.net") throw new InvalidDataException(Tr("Link Bedrock inválido."));
             versions.Add(new(match.Groups["version"].Value, type == "serverBedrockPreviewWindows", url));
         }
         return versions.OrderBy(v => v.Preview).ToList();
@@ -75,14 +76,14 @@ public sealed class ReleaseCatalog(Downloads downloads)
         var newest = doc.RootElement.EnumerateArray()
             .Where(v => v.GetProperty("version_type").GetString() != "alpha" && v.GetProperty("loaders").EnumerateArray().Any(l => l.GetString() == "fabric"))
             .OrderByDescending(v => v.GetProperty("date_published").GetDateTimeOffset()).FirstOrDefault();
-        if (newest.ValueKind == JsonValueKind.Undefined) throw new InvalidDataException("Geyser Fabric indisponível.");
+        if (newest.ValueKind == JsonValueKind.Undefined) throw new InvalidDataException(Tr("Geyser Fabric indisponível."));
         geyser = newest.Clone(); return geyser.Value;
     }
     public async Task<CrossplayPlan> PlanAsync(string minecraft, CancellationToken ct = default)
     {
         var g = await LatestGeyserAsync(ct);
         if (!g.GetProperty("game_versions").EnumerateArray().Any(v => v.GetString() == minecraft))
-            throw new InvalidDataException("O modo Java + Bedrock exige uma versão suportada pelo Geyser atual. Atualize a lista de versões.");
+            throw new InvalidDataException(Tr("O modo Java + Bedrock exige uma versão suportada pelo Geyser atual. Atualize a lista de versões."));
         return new(minecraft, Artifact(g, GeyserId, "Geyser-Fabric.jar"),
             await FindModAsync(FloodgateId, minecraft, "floodgate-fabric.jar", ct),
             await FindModAsync(FabricApiId, minecraft, "fabric-api.jar", ct));
@@ -94,23 +95,23 @@ public sealed class ReleaseCatalog(Downloads downloads)
             && v.GetProperty("game_versions").EnumerateArray().Any(g => g.GetString() == minecraft)
             && v.GetProperty("loaders").EnumerateArray().Any(l => l.GetString() == "fabric"))
             .OrderByDescending(v => v.GetProperty("date_published").GetDateTimeOffset()).FirstOrDefault();
-        if (version.ValueKind == JsonValueKind.Undefined) throw new InvalidDataException("Componente compatível indisponível: " + target);
+        if (version.ValueKind == JsonValueKind.Undefined) throw new InvalidDataException(Tr("Componente compatível indisponível: ") + target);
         return Artifact(version, project, target);
     }
     private static ModArtifact Artifact(JsonElement version, string project, string target)
     {
-        if (version.GetProperty("project_id").GetString() != project) throw new InvalidDataException("Projeto inesperado no catálogo.");
+        if (version.GetProperty("project_id").GetString() != project) throw new InvalidDataException(Tr("Projeto inesperado no catálogo."));
         var files = version.GetProperty("files").EnumerateArray().Where(f => f.GetProperty("filename").GetString()!.EndsWith(".jar", StringComparison.OrdinalIgnoreCase)).ToList();
         var file = files.FirstOrDefault(f => f.GetProperty("primary").GetBoolean());
         if (file.ValueKind == JsonValueKind.Undefined) file = files.FirstOrDefault();
-        if (file.ValueKind == JsonValueKind.Undefined) throw new InvalidDataException("JAR não encontrado.");
+        if (file.ValueKind == JsonValueKind.Undefined) throw new InvalidDataException(Tr("JAR não encontrado."));
         var hash = file.GetProperty("hashes").GetProperty("sha512").GetString()!;
-        if (!Regex.IsMatch(hash, "^[0-9a-fA-F]{128}$")) throw new InvalidDataException("Hash de componente inválido.");
+        if (!Regex.IsMatch(hash, "^[0-9a-fA-F]{128}$")) throw new InvalidDataException(Tr("Hash de componente inválido."));
         foreach (var dependency in version.GetProperty("dependencies").EnumerateArray())
             if (dependency.GetProperty("dependency_type").GetString() == "required" && dependency.GetProperty("project_id").GetString() != FabricApiId)
-                throw new InvalidDataException("O componente passou a exigir outra dependência. Atualize o NandoHost.");
+                throw new InvalidDataException(Tr("O componente passou a exigir outra dependência. Atualize o NandoHost."));
         var url = file.GetProperty("url").GetString()!; Downloads.ValidateUri(new Uri(url));
-        if (new Uri(url).Host != "cdn.modrinth.com") throw new InvalidDataException("Origem de componente inválida.");
+        if (new Uri(url).Host != "cdn.modrinth.com") throw new InvalidDataException(Tr("Origem de componente inválida."));
         return new(project, version.GetProperty("version_number").GetString()!, url, hash, target);
     }
 }

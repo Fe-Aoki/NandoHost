@@ -1,6 +1,7 @@
-﻿using System.Net;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.Core;
 
@@ -31,7 +32,7 @@ public sealed class Downloads : IDisposable
         var terrariaDownload = uri.Host == "terraria.org" && string.IsNullOrEmpty(uri.Query) &&
             (uri.AbsolutePath == "/api/get/dedicated-servers-names" || System.Text.RegularExpressions.Regex.IsMatch(uri.AbsolutePath, @"^/api/download/pc-dedicated-server/terraria-server-[0-9]{4,8}\.zip$"));
         if (uri.Scheme != "https" || !uri.IsDefaultPort || !string.IsNullOrEmpty(uri.UserInfo) || !(Hosts.Contains(uri.Host) || agentDownload || bedrockDownload || terrariaDownload || tml || runtime))
-            throw new InvalidDataException("Download bloqueado: somente HTTPS em domínios oficiais autorizados. " + uri.Host);
+            throw new InvalidDataException(Tr("Download bloqueado: somente HTTPS em domínios oficiais autorizados. ") + uri.Host);
     }
     private async Task<HttpResponseMessage> GetAsync(string url, CancellationToken ct)
     {
@@ -53,12 +54,12 @@ public sealed class Downloads : IDisposable
             catch { response.Dispose(); throw; }
             return response;
         }
-        throw new HttpRequestException("O download excedeu o limite de redirecionamentos.");
+        throw new HttpRequestException(Tr("O download excedeu o limite de redirecionamentos."));
     }
     public async Task<JsonDocument> JsonAsync(string url, CancellationToken ct = default)
     {
         using var response = await GetAsync(url, ct);
-        if (response.Content.Headers.ContentLength > 16 * 1024 * 1024) throw new InvalidDataException("Resposta de API grande demais.");
+        if (response.Content.Headers.ContentLength > 16 * 1024 * 1024) throw new InvalidDataException(Tr("Resposta de API grande demais."));
         using var source = await response.Content.ReadAsStreamAsync(ct);
         using var buffer = new MemoryStream();
         await CopyLimitedAsync(source, buffer, 16 * 1024 * 1024, ct);
@@ -71,16 +72,16 @@ public sealed class Downloads : IDisposable
         try
         {
             using var response = await GetAsync(url, ct);
-            if (response.Content.Headers.ContentLength > maxBytes) throw new InvalidDataException("Arquivo excede o tamanho permitido.");
+            if (response.Content.Headers.ContentLength > maxBytes) throw new InvalidDataException(Tr("Arquivo excede o tamanho permitido."));
             await using (var source = await response.Content.ReadAsStreamAsync(ct))
             await using (var destination = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None, 65536, true))
                 await CopyLimitedAsync(source, destination, maxBytes, ct);
             if (hash != null)
             {
                 await using var stream = File.OpenRead(temporary);
-                var digest = algorithm switch { "SHA1" => await SHA1.HashDataAsync(stream, ct), "SHA256" => await SHA256.HashDataAsync(stream, ct), "SHA512" => await SHA512.HashDataAsync(stream, ct), _ => throw new InvalidDataException("Hash não suportado.") };
+                var digest = algorithm switch { "SHA1" => await SHA1.HashDataAsync(stream, ct), "SHA256" => await SHA256.HashDataAsync(stream, ct), "SHA512" => await SHA512.HashDataAsync(stream, ct), _ => throw new InvalidDataException(Tr("Hash não suportado.")) };
                 if (!Convert.ToHexString(digest).Equals(hash, StringComparison.OrdinalIgnoreCase))
-                    throw new InvalidDataException("Integridade inválida: o arquivo baixado foi rejeitado.");
+                    throw new InvalidDataException(Tr("Integridade inválida: o arquivo baixado foi rejeitado."));
             }
             File.Move(temporary, path, true);
         }
@@ -94,7 +95,7 @@ public sealed class Downloads : IDisposable
         while ((read = await input.ReadAsync(buffer, ct)) != 0)
         {
             total += read;
-            if (total > limit) throw new InvalidDataException("Arquivo excede o tamanho permitido.");
+            if (total > limit) throw new InvalidDataException(Tr("Arquivo excede o tamanho permitido."));
             await output.WriteAsync(buffer.AsMemory(0, read), ct);
         }
     }

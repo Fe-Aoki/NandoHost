@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using NandoHost.Core;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.App;
 
@@ -16,28 +17,28 @@ public partial class MainWindow
     private void JavaPathChanged(object sender, TextChangedEventArgs e)
     {
         if (!uiReady) return;
-        JavaStatusText.Text = selected?.Installed == true && !selected.IsBedrock
-            ? $"Este perfil exige Java {selected.RequiredJava} ou superior. Use Verificar Java para conferir o caminho."
-            : "Use Verificar Java para detectar a versão deste executável.";
+        LocalizedUi.Set(JavaStatusText, "Text", () => selected?.Installed == true && !selected.IsBedrock
+            ? TrFormat("Este perfil exige Java {0} ou superior. Use Verificar Java para conferir o caminho.", selected.RequiredJava)
+            : Tr("Use Verificar Java para detectar a versão deste executável."));
     }
     private async Task VerifyJavaAsync(CancellationToken ct)
     {
         var major = await ServerProcess.CheckJavaAsync(JavaBox.Text.Trim(), ct);
-        JavaStatusText.Text = selected?.Installed == true && !selected.IsBedrock
-            ? major >= selected.RequiredJava ? $"Java {major} detectado. Atende ao mínimo de Java {selected.RequiredJava} deste perfil."
-                : $"Java {major} detectado. Este perfil exige Java {selected.RequiredJava} ou superior; selecione outro java.exe."
-            : $"Java {major} detectado. O instalador informará o requisito da versão de Minecraft escolhida.";
-        SetStatus(JavaStatusText.Text);
+        LocalizedUi.Set(JavaStatusText, "Text", () => selected?.Installed == true && !selected.IsBedrock
+            ? major >= selected.RequiredJava ? TrFormat("Java {0} detectado. Atende ao mínimo de Java {1} deste perfil.", major, selected.RequiredJava)
+                : TrFormat("Java {0} detectado. Este perfil exige Java {1} ou superior; selecione outro java.exe.", major, selected.RequiredJava)
+            : TrFormat("Java {0} detectado. O instalador informará o requisito da versão de Minecraft escolhida.", major));
+        SetStatus(() => JavaStatusText.Text);
     }
     private async void CheckJavaClick(object sender, RoutedEventArgs e) => await Guard(VerifyJavaAsync);
     private void CopyBedrockHostClick(object sender, RoutedEventArgs e)
     {
-        Clipboard.SetText("127.0.0.1"); SetStatus("Endereço local copiado. Informe a porta no campo separado do jogo.");
+        Clipboard.SetText("127.0.0.1"); SetStatus(() => Tr("Endereço local copiado. Informe a porta no campo separado do jogo."));
     }
     private void CopyBedrockPortClick(object sender, RoutedEventArgs e)
     {
         if (selected == null) return;
-        Clipboard.SetText((selected.IsCrossplay ? selected.BedrockPort : selected.Port).ToString()); SetStatus("Porta local copiada.");
+        Clipboard.SetText((selected.IsCrossplay ? selected.BedrockPort : selected.Port).ToString()); SetStatus(() => Tr("Porta local copiada."));
     }
     internal async Task<string> PreviewReviewChecksAsync(bool installed)
     {

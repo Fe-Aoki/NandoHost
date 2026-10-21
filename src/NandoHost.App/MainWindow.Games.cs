@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using NandoHost.Core;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.App;
 
@@ -17,7 +18,7 @@ public partial class MainWindow
     private ListCollectionView serverView = null!;
     private ServerProfile NewTerrariaProfile() => new()
     {
-        Game = "Terraria", Name = "Meu Terraria " + (profiles.Count(p => p.IsTerraria) + 1), Edition = "PC", Engine = "Terraria",
+        Game = "Terraria", Name = Tr("Meu Terraria ") + (profiles.Count(p => p.IsTerraria) + 1), Edition = "PC", Engine = "Terraria",
         MinecraftVersion = "1.4.5.8", Port = NextPort("Terraria"), MaxPlayers = 8, Whitelist = false,
         LaunchJar = "TerrariaServer.exe", RequiredJava = 0
     };
@@ -28,7 +29,7 @@ public partial class MainWindow
         if (target?.Id == selected?.Id && currentGame == game) return true;
         if (busy || runner.IsActive || tunnel.IsActive)
         {
-            SetStatus("Pare o servidor e o agente e conclua a tarefa antes de trocar de jogo ou perfil."); return false;
+            SetStatus(() => Tr("Pare o servidor e o agente e conclua a tarefa antes de trocar de jogo ou perfil.")); return false;
         }
         target ??= profiles.FirstOrDefault(p => p.Game == game);
         if (target == null)
@@ -43,14 +44,14 @@ public partial class MainWindow
     {
         var entries = profiles.Where(p => p.Game == homeGame).ToList();
         HomeServerShortcuts.ItemsSource = entries.Take(3).ToList();
-        HomeProfileCount.Text = entries.Count > 3 ? "3 de " + entries.Count + " perfis" : entries.Count == 1 ? "1 perfil" : entries.Count + " perfis";
-        HomeProfileCount.ToolTip = entries.Count > 3 ? "Abra o jogo para acessar todos os perfis." : null;
+        LocalizedUi.Set(HomeProfileCount, "Text", () => entries.Count > 3 ? Tr("3 de ") + entries.Count + Tr(" perfis") : entries.Count == 1 ? Tr("1 perfil") : entries.Count + Tr(" perfis"));
+        LocalizedUi.Set(HomeProfileCount, "ToolTip", () => entries.Count > 3 ? Tr("Abra o jogo para acessar todos os perfis.") : null);
         RefreshLibraryCovers();
         var same = selected?.Game == homeGame;
         HomeManageButton.IsEnabled = same || !busy && !runner.IsActive && !tunnel.IsActive;
-        MinecraftGameAction.Text = runner.IsActive && same ? "Voltar ao servidor  →" : "Abrir servidores  →";
-        HomeManageButton.ToolTip = HomeManageButton.IsEnabled ? "Abre o painel sem iniciar um servidor." : "Pare o servidor e o agente antes de trocar de jogo.";
-        System.Windows.Automation.AutomationProperties.SetName(HomeManageButton, "Abrir servidores de " + homeGame);
+        LocalizedUi.Set(MinecraftGameAction, "Text", () => runner.IsActive && same ? Tr("Voltar ao servidor  →") : Tr("Abrir servidores  →"));
+        LocalizedUi.Set(HomeManageButton, "ToolTip", () => HomeManageButton.IsEnabled ? Tr("Abre o painel sem iniciar um servidor.") : Tr("Pare o servidor e o agente antes de trocar de jogo."));
+        System.Windows.Automation.AutomationProperties.SetName(HomeManageButton, Tr("Abrir servidores de ") + homeGame);
     }
     private void LoadTerrariaFields(ServerProfile p)
     {
@@ -78,58 +79,59 @@ public partial class MainWindow
         }
         JavaFields.Visibility = terraria || DraftEdition == "Bedrock" ? Visibility.Collapsed : Visibility.Visible;
         PacksNav.Visibility = Visibility.Visible;
-        PacksNav.Content = terraria ? "▦    Mods" : "▦    Modpacks";
+        LocalizedUi.Set(PacksNav, "Content", () => terraria ? "▦    Mods" : "▦    Modpacks");
         MinecraftPacksPanel.Visibility = minecraft; TerrariaModsPanel.Visibility = show;
         ApplyGameTheme(); RefreshTerrariaMods();
-        VersionCaption.Text = selected?.IsTModLoader == true ? "Versão do tModLoader" : terraria ? "Versão do Terraria (PC)" : "Versão do Minecraft";
+        LocalizedUi.Set(VersionCaption, "Text", () => selected?.IsTModLoader == true ? Tr("Versão do tModLoader") : terraria ? Tr("Versão do Terraria (PC)") : Tr("Versão do Minecraft"));
         System.Windows.Automation.AutomationProperties.SetName(VersionBox, VersionCaption.Text);
-        if (terraria) PortCaption.Text = "Porta Terraria (TCP)";
+        if (terraria) LocalizedUi.Set(PortCaption, "Text", () => Tr("Porta Terraria (TCP)"));
         GameBrandIcon.Source = (ImageSource)FindResource(terraria ? "TerrariaGameImage" : "MinecraftGameImage");
-        GameBrandIcon.ToolTip = terraria ? "Terraria" : "Minecraft";
+        LocalizedUi.Set(GameBrandIcon, "ToolTip", () => terraria ? "Terraria" : "Minecraft");
         System.Windows.Automation.AutomationProperties.SetName(GameBrandIcon, terraria ? "Terraria" : "Minecraft");
         BannerViewport.Background = (Brush)FindResource(terraria ? selected?.TerrariaPreset == "Calamity" && selected.IsTModLoader ? "CalamitySceneBrush" : "TerrariaSceneBrush" : "LandscapeBrush");
         PageTitle.FontFamily = terraria ? (FontFamily)FindResource("TerrariaFont") : (FontFamily)FindResource("MinecraftFont");
         GameEntryImage.Source = GameBrandIcon.Source;
-        GameEntryTitle.Text = selected?.IsTModLoader == true && selected.TerrariaPreset == "Calamity" ? "Calamity" : terraria ? "Terraria" : "Minecraft";
+        LocalizedUi.Set(GameEntryTitle, "Text", () => selected?.IsTModLoader == true && selected.TerrariaPreset == "Calamity" ? "Calamity" : terraria ? "Terraria" : "Minecraft");
         HeroTitle.FontFamily = terraria ? (FontFamily)FindResource("TerrariaFont") : (FontFamily)FindResource("MinecraftFont");
-        NativeInfoText.Text = selected?.IsTModLoader == true ? "tModLoader para PC. Mods e mundos isolados neste perfil; seus amigos precisam das mesmas versões." : "Terraria Vanilla para PC. Cada perfil tem um mundo próprio. Não utiliza Java.";
+        LocalizedUi.Set(NativeInfoText, "Text", () => selected?.IsTModLoader == true ? Tr("tModLoader para PC. Mods e mundos isolados neste perfil; seus amigos precisam das mesmas versões.") : Tr("Terraria Vanilla para PC. Cada perfil tem um mundo próprio. Não utiliza Java."));
         GameEntryTitle.FontFamily = PageTitle.FontFamily;
-        System.Windows.Automation.AutomationProperties.SetName(GameEntryOverlay, "Entrando no painel de " + (selected?.Game ?? "jogo"));
+        System.Windows.Automation.AutomationProperties.SetName(GameEntryOverlay, Tr("Entrando no painel de ") + (selected?.Game ?? Tr("jogo")));
         GameEntryLandscape.Background = BannerViewport.Background;
         if (terraria)
         {
+            var terrariaProfile = selected!;
             LocalJavaPanel.Visibility = Visibility.Collapsed; LocalBedrockPanel.Visibility = Visibility.Visible;
-            LocalBedrockAddress.Text = "127.0.0.1 · porta " + selected!.Port;
+            LocalizedUi.Set(LocalBedrockAddress, "Text", () => Tr("127.0.0.1 · porta ") + terrariaProfile.Port);
             BedrockLocalHint.Visibility = Visibility.Collapsed;
-            PublicAddressLabel.Text = "Endereço externo Terraria (TCP)";
-            TunnelTargetText.Text = $"Terraria → este agente → 127.0.0.1:{selected.Port} (TCP).";
-            TunnelPlanText.Text = "No playit, escolha o preset Terraria do plano gratuito e a porta local acima. O NandoHost não contrata planos. Seus amigos usam o endereço e a porta públicos com a mesma versão Terraria para PC.";
-            if (selected.IsTModLoader) TunnelPlanText.Text = "No playit, escolha o preset Terraria gratuito e a porta local acima. Seus amigos entram pelo tModLoader usando o endereço e a porta públicos, com versões compatíveis do tModLoader e dos mods. O NandoHost não contrata planos.";
-            InstalledText.Text = selected.Installed ? selected.IsTModLoader ? "tModLoader instalado · runtime privado" : "Terraria dedicado instalado · sem Java" : "Ainda não instalado";
-            MemoryDetail.Text = "Uso real do servidor nativo; RAM automática";
+            LocalizedUi.Set(PublicAddressLabel, "Text", () => Tr("Endereço externo Terraria (TCP)"));
+            LocalizedUi.Set(TunnelTargetText, "Text", () => TrFormat("Terraria → este agente → 127.0.0.1:{0} (TCP).", terrariaProfile.Port));
+            LocalizedUi.Set(TunnelPlanText, "Text", () => Tr("No playit, escolha o preset Terraria do plano gratuito e a porta local acima. O NandoHost não contrata planos. Seus amigos usam o endereço e a porta públicos com a mesma versão Terraria para PC."));
+            if (terrariaProfile.IsTModLoader) LocalizedUi.Set(TunnelPlanText, "Text", () => Tr("No playit, escolha o preset Terraria gratuito e a porta local acima. Seus amigos entram pelo tModLoader usando o endereço e a porta públicos, com versões compatíveis do tModLoader e dos mods. O NandoHost não contrata planos."));
+            LocalizedUi.Set(InstalledText, "Text", () => terrariaProfile.Installed ? terrariaProfile.IsTModLoader ? Tr("tModLoader instalado · runtime privado") : Tr("Terraria dedicado instalado · sem Java") : Tr("Ainda não instalado"));
+            LocalizedUi.Set(MemoryDetail, "Text", () => Tr("Uso real do servidor nativo; RAM automática"));
         }
-        LocalNativeCaption.Text = terraria ? "TERRARIA · ENDEREÇO E PORTA SEPARADOS" : "BEDROCK · PREENCHA ENDEREÇO E PORTA SEPARADAMENTE";
+        LocalizedUi.Set(LocalNativeCaption, "Text", () => terraria ? Tr("TERRARIA · ENDEREÇO E PORTA SEPARADOS") : Tr("BEDROCK · PREENCHA ENDEREÇO E PORTA SEPARADAMENTE"));
     }
     private ServerProfile SaveTerrariaSettings()
     {
         if (selected == null || !selected.IsTerraria || runner.IsActive)
-            throw new InvalidOperationException("Pare o servidor para alterar as configurações.");
+            throw new InvalidOperationException(Tr("Pare o servidor para alterar as configurações."));
         if (versionLoading || VersionBox.SelectedItem is not ServerVersion version)
-            throw new InvalidOperationException("Aguarde o catálogo e escolha uma versão Terraria disponível.");
+            throw new InvalidOperationException(Tr("Aguarde o catálogo e escolha uma versão Terraria disponível."));
         var p = JsonSerializer.Deserialize<ServerProfile>(JsonSerializer.Serialize(selected))!;
         p.Name = NameBox.Text.Trim(); p.MinecraftVersion = version.Id;
         if (!int.TryParse(PortBox.Text, out var port) || !int.TryParse(PlayersBox.Text, out var players))
-            throw new InvalidDataException("Preencha porta e jogadores com números inteiros.");
+            throw new InvalidDataException(Tr("Preencha porta e jogadores com números inteiros."));
         p.Port = port; p.MaxPlayers = players;
         if (tunnel.IsActive && p.Port != selected.Port)
-            throw new InvalidOperationException("Pare o agente antes de alterar a porta local do túnel.");
+            throw new InvalidOperationException(Tr("Pare o agente antes de alterar a porta local do túnel."));
         p.WorldName = WorldNameBox.Text.Trim(); p.WorldSeed = WorldSeedBox.Text.Trim();
         p.WorldSize = WorldSizeBox.SelectedIndex + 1; p.WorldDifficulty = WorldDifficultyBox.SelectedIndex;
         p.WorldPassword = WorldPasswordBox.Password;
         var existingWorld = File.Exists(SafePaths.Inside(store.ServerRoot(selected), "worlds/world.wld"));
         if ((selected.Installed || existingWorld) && (p.MinecraftVersion != selected.MinecraftVersion || p.WorldName != selected.WorldName ||
             p.WorldSeed != selected.WorldSeed || p.WorldSize != selected.WorldSize || p.WorldDifficulty != selected.WorldDifficulty))
-            throw new InvalidOperationException("Crie outro perfil para trocar a versão ou gerar outro mundo. O mundo atual será preservado.");
+            throw new InvalidOperationException(Tr("Crie outro perfil para trocar a versão ou gerar outro mundo. O mundo atual será preservado."));
         ProfileStore.Validate(p);
         var index = profiles.IndexOf(selected); var replacement = profiles.ToList(); replacement[index] = p;
         store.WriteProperties(p); store.Save(replacement); profiles[index] = p; selected = p; ServerList.SelectedItem = p;

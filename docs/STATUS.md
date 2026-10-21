@@ -1,8 +1,12 @@
 # Estado do projeto
 
+Versão atual: **0.9.0**, com seleção de português e inglês.
+
 Base inicial deste repositório: **NandoHost 0.8.9**. A organização em `src`, `tests`, `docs` e `scripts` não altera o formato dos perfis nem o comportamento dos jogos.
 
 ## Implementado
+
+- Português e inglês com troca imediata e preferência salva.
 
 - Biblioteca com busca, capas e atalhos dos perfis existentes.
 - Temas próprios de Minecraft, Terraria e Calamity.

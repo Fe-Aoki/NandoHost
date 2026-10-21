@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,6 +20,7 @@ using System.Windows.Threading;
 using NandoHost.Core;
 using Microsoft.Win32;
 using Forms = System.Windows.Forms;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.App;
 
@@ -55,7 +56,9 @@ public partial class MainWindow : Window
     {
         this.smoke = smoke;
         allowSmokeCatalog = smoke && liveCatalog;
+        Localizer.SetCulture(smoke ? "pt-BR" : UiPreferencesStore.Load(dataFolder));
         InitializeComponent();
+        LanguageBox.SelectedValue = Localizer.CultureCode;
         PreviewKeyDown += EntryKeyDown;
         NativeWindowTheme.Attach(this);
         SizeChanged += ResponsiveSizeChanged;
@@ -81,7 +84,7 @@ public partial class MainWindow : Window
         tunnel.Notice += notice => Dispatcher.BeginInvoke(new Action(() =>
         {
             if (closed) return;
-            TunnelDetailText.Text = notice.Message;
+            LocalizedUi.Set(TunnelDetailText, "Text", () => notice.Message);
             if (notice.ClaimUrl != null) { claimUrl = notice.ClaimUrl; ClaimAgentButton.IsEnabled = tunnel.IsActive; }
             if (notice.Address != null && tunnel.IsActive)
             {
@@ -99,11 +102,11 @@ public partial class MainWindow : Window
         if (!smoke)
         {
             var menu = new Forms.ContextMenuStrip();
-            menu.Items.Add("Abrir NandoHost", null, (_, _) => Dispatcher.Invoke(Restore));
-            menu.Items.Add("Sair com segurança", null, (_, _) => Dispatcher.Invoke(Close));
+            menu.Items.Add(Tr("Abrir NandoHost"), null, (_, _) => Dispatcher.Invoke(Restore));
+            menu.Items.Add(Tr("Sair com segurança"), null, (_, _) => Dispatcher.Invoke(Close));
             using (var resource = Application.GetResourceStream(new Uri("pack://application:,,,/NandoHost;component/Assets/Icons/nandohost-red.ico")).Stream)
             using (var icon = new System.Drawing.Icon(resource, 32, 32)) trayIcon = (System.Drawing.Icon)icon.Clone();
-            tray = new Forms.NotifyIcon { Icon = trayIcon, Text = "NandoHost · servidores de jogos", ContextMenuStrip = menu, Visible = true };
+            tray = new Forms.NotifyIcon { Icon = trayIcon, Text = Tr("NandoHost · servidores de jogos"), ContextMenuStrip = menu, Visible = true };
             tray.DoubleClick += (_, _) => Dispatcher.Invoke(Restore);
             StateChanged += (_, _) =>
             {
@@ -111,15 +114,17 @@ public partial class MainWindow : Window
                 if (WindowState == WindowState.Minimized && runner.IsActive)
                 {
                     Hide();
-                    tray.ShowBalloonTip(2500, "NandoHost continua ligado", "O servidor continua funcionando. Abra o painel pelo ícone na bandeja.", Forms.ToolTipIcon.Info);
+                    tray.ShowBalloonTip(2500, Tr("NandoHost continua ligado"), Tr("O servidor continua funcionando. Abra o painel pelo ícone na bandeja."), Forms.ToolTipIcon.Info);
                 }
             };
         }
-        runner.Message("NandoHost 0.8.9 · o servidor e seus mundos ficam neste computador.");
-        runner.Message("Comece em Configurações: escolha a versão e instale o servidor.");
-        runner.Message("Para amigos de fora da sua rede, configure Conexão externa.");
+        runner.Message(Tr("NandoHost 0.9.0 · o servidor e seus mundos ficam neste computador."));
+        runner.Message(Tr("Comece em Configurações: escolha a versão e instale o servidor."));
+        runner.Message(Tr("Para amigos de fora da sua rede, configure Conexão externa."));
         if (!selected!.Installed) Navigate(3);
         uiReady = true; ApplyEditionLayout();
+        LanguageState.Current.Changed += OnLanguageChanged;
+        Closed += (_, _) => LanguageState.Current.Changed -= OnLanguageChanged;
         Loaded += async (_, _) => { if (GameHome.Visibility != Visibility.Visible) await ReloadVersionsAsync(); };
         ShowHome();
         UpdateControls();
@@ -129,11 +134,11 @@ public partial class MainWindow : Window
     {
         ResetGameTransition();
         CommandPopup.IsOpen = false;
-        MinecraftGameAction.Text = runner.IsActive ? "Voltar ao servidor  →" : "Abrir servidores  →";
-        HomeRunStatus.Text = runner.IsActive ? "Servidor em execução: " + selected?.Name : "Nenhum servidor em execução.";
+        LocalizedUi.Set(MinecraftGameAction, "Text", () => runner.IsActive ? Tr("Voltar ao servidor  →") : Tr("Abrir servidores  →"));
+        LocalizedUi.Set(HomeRunStatus, "Text", () => runner.IsActive ? Tr("Servidor em execução: ") + selected?.Name : Tr("Nenhum servidor em execução."));
         SelectHomeGame(runner.IsActive ? currentGame : homeGame);
         GameHome.Visibility = Visibility.Visible;
-        SetStatus(runner.IsActive ? "Seu servidor continua ligado. Abra o jogo correspondente para acompanhar o console." : "Escolha um jogo para abrir seus servidores.");
+        SetStatus(() => runner.IsActive ? Tr("Seu servidor continua ligado. Abra o jogo correspondente para acompanhar o console.") : Tr("Escolha um jogo para abrir seus servidores."));
     }
     private string homeGame = "Minecraft";
     private void HomeSelectGameClick(object sender, RoutedEventArgs e)
@@ -144,13 +149,13 @@ public partial class MainWindow : Window
     {
         homeGame = game == "Terraria" ? "Terraria" : "Minecraft";
         var minecraft = homeGame == "Minecraft";
-        HomeHeroTitle.Text = homeGame;
+        LocalizedUi.Set(HomeHeroTitle, "Text", () => homeGame);
         HomeHeroTitle.FontFamily = minecraft ? (FontFamily)FindResource("MinecraftFont") : (FontFamily)FindResource("TerrariaFont");
-        HomeHeroSubtitle.Text = minecraft ? "JAVA E BEDROCK" : "PC · VANILLA E MODS";
+        LocalizedUi.Set(HomeHeroSubtitle, "Text", () => minecraft ? Tr("JAVA E BEDROCK") : Tr("PC · VANILLA E MODS"));
         HomeGameHero.Background = (Brush)FindResource(minecraft ? "LandscapeBrush" : "TerrariaSceneBrush");
         HomeManageButton.Visibility = HomeServerSection.Visibility = HomeRunStatus.Visibility = Visibility.Visible;
         HomeComingSoonPanel.Visibility = Visibility.Collapsed;
-        HomeGameSummary.Text = minecraft ? "Vanilla, Fabric e modpacks" : "Vanilla, Calamity e mods com tModLoader";
+        LocalizedUi.Set(HomeGameSummary, "Text", () => minecraft ? Tr("Vanilla, Fabric e modpacks") : Tr("Vanilla, Calamity e mods com tModLoader"));
         RefreshGameLibrary();
         RefreshLibraryCovers();
         foreach (var button in new[] { MinecraftGameButton, TerrariaGameButton })
@@ -178,7 +183,7 @@ public partial class MainWindow : Window
         Navigate(0);
         BeginGameTransition();
         if (!busy && !runner.IsActive)
-            SetStatus(selected?.Installed == true ? "Visão geral do servidor." : "Use Preparar servidor para escolher a edição e instalar.");
+            SetStatus(() => selected?.Installed == true ? Tr("Visão geral do servidor.") : Tr("Use Preparar servidor para escolher a edição e instalar."));
         if (!runner.IsActive && !busy) await ReloadVersionsAsync();
     }
     private Storyboard? gameEntryStoryboard;
@@ -287,7 +292,7 @@ public partial class MainWindow : Window
         if (target == null) return;
         if (target.Id != selected?.Id && (busy || runner.IsActive || tunnel.IsActive))
         {
-            SetStatus("Conclua a tarefa e pare o servidor e o agente antes de trocar de perfil.");
+            SetStatus(() => Tr("Conclua a tarefa e pare o servidor e o agente antes de trocar de perfil."));
             return;
         }
         homeGame = target.Game;
@@ -440,16 +445,16 @@ public partial class MainWindow : Window
         var now = DateTime.UtcNow;
         if ((now - lastMetrics).TotalSeconds < 2) return;
         lastMetrics = now;
-        using (var app = Process.GetCurrentProcess()) AppMemoryText.Text = $"Painel: {app.WorkingSet64 / 1048576d:0} MB";
+        using (var app = Process.GetCurrentProcess()) { var appMemoryMb = app.WorkingSet64 / 1048576d; LocalizedUi.Set(AppMemoryText, "Text", () => TrFormat("Painel: {0:0} MB", appMemoryMb)); }
         var metrics = runner.Metrics();
         if (metrics is { } m)
         {
-            MemoryText.Text = $"{m.MemoryMb:0} MB";
+            LocalizedUi.Set(MemoryText, "Text", () => $"{m.MemoryMb:0} MB");
             var percent = (m.Cpu - lastCpu).TotalMilliseconds / Math.Max(1, (now - lastCpuAt).TotalMilliseconds) / Environment.ProcessorCount * 100;
-            CpuText.Text = $"{Math.Clamp(percent, 0, 100):0.0} %";
+            LocalizedUi.Set(CpuText, "Text", () => $"{Math.Clamp(percent, 0, 100):0.0} %");
             lastCpu = m.Cpu;
         }
-        else { MemoryText.Text = "— MB"; CpuText.Text = "— %"; lastCpu = TimeSpan.Zero; }
+        else { LocalizedUi.Set(MemoryText, "Text", () => "— MB"); LocalizedUi.Set(CpuText, "Text", () => "— %"); lastCpu = TimeSpan.Zero; }
         lastCpuAt = now;
     }
 
@@ -457,11 +462,11 @@ public partial class MainWindow : Window
     {
 
         Pages.SelectedIndex = index;
-        var titles = new[] { selected?.Name ?? "Visão geral", "Modpacks, sem complicação.", "Convide quem está longe.", "Do seu jeito." };
-        var subtitles = new[] { "Seu servidor, com controle em tempo real.", "Modpacks Java/Fabric. A importação cria um perfil Java separado.", "Compartilhe seu mundo com amigos de qualquer lugar.", "Equilibre o servidor e o " + (selected?.Game ?? "jogo") + " no mesmo computador." };
-        var eyebrows = new[] { "PAINEL DO SERVIDOR", "BIBLIOTECA DE MODPACKS", "CONEXÃO EXTERNA", "CONFIGURAÇÕES DO SERVIDOR" };
-        if (selected?.IsTerraria == true) { titles[1] = "Uma aventura com mods."; subtitles[1] = "Calamity e mods personalizados com tModLoader para PC."; eyebrows[1] = "MODS DO TERRARIA"; }
-        PageTitle.Text = titles[index]; PageSubtitle.Text = subtitles[index]; PageEyebrow.Text = eyebrows[index];
+        var titles = new[] { selected?.Name ?? Tr("Visão geral"), Tr("Modpacks, sem complicação."), Tr("Convide quem está longe."), Tr("Do seu jeito.") };
+        var subtitles = new[] { Tr("Seu servidor, com controle em tempo real."), Tr("Modpacks Java/Fabric. A importação cria um perfil Java separado."), Tr("Compartilhe seu mundo com amigos de qualquer lugar."), Tr("Equilibre o servidor e o ") + (selected?.Game ?? Tr("jogo")) + Tr(" no mesmo computador.") };
+        var eyebrows = new[] { Tr("PAINEL DO SERVIDOR"), Tr("BIBLIOTECA DE MODPACKS"), Tr("CONEXÃO EXTERNA"), Tr("CONFIGURAÇÕES DO SERVIDOR") };
+        if (selected?.IsTerraria == true) { titles[1] = Tr("Uma aventura com mods."); subtitles[1] = Tr("Calamity e mods personalizados com tModLoader para PC."); eyebrows[1] = Tr("MODS DO TERRARIA"); }
+        LocalizedUi.Set(PageTitle, "Text", () => titles[index]); LocalizedUi.Set(PageSubtitle, "Text", () => subtitles[index]); LocalizedUi.Set(PageEyebrow, "Text", () => eyebrows[index]);
         var buttons = new[] { DashboardNav, PacksNav, NetworkNav, SettingsNav };
         for (var i = 0; i < buttons.Length; i++)
         {
@@ -488,8 +493,8 @@ public partial class MainWindow : Window
         WhitelistCheck.IsChecked = p.Whitelist; EulaCheck.IsChecked = p.EulaAccepted;
         LoadTerrariaFields(p);
         PublicAddressBox.Text = p.PublicAddress; BedrockPublicBox.Text = p.BedrockPublicAddress;
-        LocalAddress.Text = "localhost:" + p.Port;
-        if (Pages.SelectedIndex == 0) PageTitle.Text = p.Name;
+        LocalizedUi.Set(LocalAddress, "Text", () => "localhost:" + p.Port);
+        if (Pages.SelectedIndex == 0) LocalizedUi.Set(PageTitle, "Text", () => p.Name);
         loadingProfile = false; ApplyEditionLayout();
         UpdateControls();
         if (uiReady) _ = ReloadVersionsAsync();
@@ -500,8 +505,8 @@ public partial class MainWindow : Window
         var active = runner.IsActive;
         var installed = selected.Installed && File.Exists(Path.Combine(store.ServerRoot(selected), selected.LaunchJar));
         StartButton.IsEnabled = !busy && !active;
-        StartButton.Content = !installed ? "⚙  PREPARAR SERVIDOR" : !selected.IsTerraria && !selected.EulaAccepted ? "☷  REVISAR EULA" : "▶  LIGAR SERVIDOR";
-        StartButton.ToolTip = !installed ? "Escolha a edição e instale o servidor em Configurações." : !selected.IsTerraria && !selected.EulaAccepted ? "Leia e aceite a EULA, se concordar, antes de executar." : "Inicia o servidor local. O acesso externo depende da conexão configurada.";
+        LocalizedUi.Set(StartButton, "Content", () => !installed ? Tr("⚙  PREPARAR SERVIDOR") : !selected.IsTerraria && !selected.EulaAccepted ? Tr("☷  REVISAR EULA") : Tr("▶  LIGAR SERVIDOR"));
+        LocalizedUi.Set(StartButton, "ToolTip", () => !installed ? Tr("Escolha a edição e instale o servidor em Configurações.") : !selected.IsTerraria && !selected.EulaAccepted ? Tr("Leia e aceite a EULA, se concordar, antes de executar.") : Tr("Inicia o servidor local. O acesso externo depende da conexão configurada."));
         StopButton.IsEnabled = !busy && runner.State is ServerState.Running or ServerState.Starting;
         ForceButton.Visibility = runner.State == ServerState.Stopping ? Visibility.Visible : Visibility.Collapsed;
         ConfigFields.IsEnabled = !busy && !active && !tunnel.IsActive;
@@ -516,72 +521,72 @@ public partial class MainWindow : Window
         WhitelistCheck.IsEnabled = ConfigFields.IsEnabled;
         EulaCheck.IsEnabled = ConfigFields.IsEnabled;
         CheckJavaButton.IsEnabled = !busy && !active;
-        SettingsLockText.Text = busy ? "Tarefa em andamento. Aguarde ou use Cancelar tarefa." : active ? "Pare o servidor para alterar as configurações." : tunnel.IsActive ? "Pare o agente em Conexão externa para alterar o perfil ou a instalação." : "";
+        LocalizedUi.Set(SettingsLockText, "Text", () => busy ? Tr("Tarefa em andamento. Aguarde ou use Cancelar tarefa.") : active ? Tr("Pare o servidor para alterar as configurações.") : tunnel.IsActive ? Tr("Pare o agente em Conexão externa para alterar o perfil ou a instalação.") : "");
         SettingsLockText.Visibility = SettingsLockText.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
-        SaveButton.ToolTip = SettingsLockText.Text.Length > 0 ? SettingsLockText.Text : "Salva as opções deste perfil.";
+        LocalizedUi.Set(SaveButton, "ToolTip", () => SettingsLockText.Text.Length > 0 ? SettingsLockText.Text : Tr("Salva as opções deste perfil."));
         InstallButton.IsEnabled &= !(selected.IsTModLoader && selected.Installed);
-        InstallButton.Content = selected.Installed ? "Reinstalar servidor" : "Baixar e instalar";
-        InstallButton.ToolTip = SettingsLockText.Text.Length > 0 ? SettingsLockText.Text : selected.Installed ? "Reinstala a versão fixada deste perfil." : "Baixa os arquivos da edição e versão selecionadas.";
+        LocalizedUi.Set(InstallButton, "Content", () => selected.Installed ? Tr("Reinstalar servidor") : Tr("Baixar e instalar"));
+        LocalizedUi.Set(InstallButton, "ToolTip", () => SettingsLockText.Text.Length > 0 ? SettingsLockText.Text : selected.Installed ? Tr("Reinstala a versão fixada deste perfil.") : Tr("Baixa os arquivos da edição e versão selecionadas."));
         ServerList.IsEnabled = !busy && !active && !tunnel.IsActive;
         foreach (var button in new[] { NewButton, ImportMrButton, ImportCfButton, BackupButton }) button.IsEnabled = !busy && !active && !tunnel.IsActive;
         BackupButton.IsEnabled = !busy && !active && !tunnel.IsActive && installed;
-        BackupButton.ToolTip = !installed ? "Instale o servidor antes de criar um backup." : active ? "Pare o servidor para salvar um backup consistente." : "Cria um ZIP do perfil e abre a pasta do backup.";
+        LocalizedUi.Set(BackupButton, "ToolTip", () => !installed ? Tr("Instale o servidor antes de criar um backup.") : active ? Tr("Pare o servidor para salvar um backup consistente.") : Tr("Cria um ZIP do perfil e abre a pasta do backup."));
         DownloadAgentButton.IsEnabled = !busy && !tunnel.IsActive;
         StartAgentButton.IsEnabled = !busy && !tunnel.IsActive && File.Exists(AgentFile);
         StopAgentButton.IsEnabled = !busy && tunnel.IsActive;
         ClaimAgentButton.IsEnabled = tunnel.IsActive && claimUrl != null;
-        TunnelStateText.Text = tunnel.IsActive ? "●  Agente em execução" : "●  Agente parado";
-        EditionBadge.Text = selected.EditionLabel.ToUpperInvariant();
+        LocalizedUi.Set(TunnelStateText, "Text", () => tunnel.IsActive ? Tr("●  Agente em execução") : Tr("●  Agente parado"));
+        LocalizedUi.Set(EditionBadge, "Text", () => selected.EditionLabel.ToUpperInvariant());
         BedrockPublicPanel.Visibility = selected.IsCrossplay ? Visibility.Visible : Visibility.Collapsed;
         LocalJavaPanel.Visibility = selected.IsBedrock ? Visibility.Collapsed : Visibility.Visible;
         LocalBedrockPanel.Visibility = selected.IsBedrock || selected.IsCrossplay ? Visibility.Visible : Visibility.Collapsed;
-        LocalBedrockAddress.Text = "127.0.0.1 · porta " + (selected.IsCrossplay ? selected.BedrockPort : selected.Port);
-        PublicAddressLabel.Text = selected.IsBedrock ? "Endereço externo Bedrock" : "Endereço externo Java";
+        LocalizedUi.Set(LocalBedrockAddress, "Text", () => Tr("127.0.0.1 · porta ") + (selected.IsCrossplay ? selected.BedrockPort : selected.Port));
+        LocalizedUi.Set(PublicAddressLabel, "Text", () => selected.IsBedrock ? Tr("Endereço externo Bedrock") : Tr("Endereço externo Java"));
         BedrockLocalHint.Visibility = selected.IsBedrock || selected.IsCrossplay ? Visibility.Visible : Visibility.Collapsed;
-        TunnelTargetText.Text = selected.IsBedrock ? $"Bedrock → este agente → 127.0.0.1:{selected.Port}. Confira transport e server-udp-ports no server.properties."
+        LocalizedUi.Set(TunnelTargetText, "Text", () => selected.IsBedrock ? TrFormat("Bedrock → este agente → 127.0.0.1:{0}. Confira transport e server-udp-ports no server.properties.", selected.Port)
             : selected.IsCrossplay ? $"Java: 127.0.0.1:{selected.Port} (TCP). Bedrock/Geyser: 127.0.0.1:{selected.BedrockPort} (TCP + UDP / NetherNet)."
-            : $"Minecraft Java → este agente → 127.0.0.1:{selected.Port} (TCP).";
-        TunnelPlanText.Text = selected.IsBedrock || selected.IsCrossplay
-            ? "Confira a versão e o transporte do Bedrock. O playit lista NetherNet como Premium; o NandoHost não contrata planos. Para não gastar, use uma rota direta compatível quando disponível. Não há garantia de acesso externo gratuito com todas as versões."
-            : "Escolha o túnel Minecraft Java gratuito no site. O NandoHost não contrata planos. O agente continua ligado até você pará-lo ou fechar o aplicativo.";
+            : TrFormat("Minecraft Java → este agente → 127.0.0.1:{0} (TCP).", selected.Port));
+        LocalizedUi.Set(TunnelPlanText, "Text", () => selected.IsBedrock || selected.IsCrossplay
+            ? Tr("Confira a versão e o transporte do Bedrock. O playit lista NetherNet como Premium; o NandoHost não contrata planos. Para não gastar, use uma rota direta compatível quando disponível. Não há garantia de acesso externo gratuito com todas as versões.")
+            : Tr("Escolha o túnel Minecraft Java gratuito no site. O NandoHost não contrata planos. O agente continua ligado até você pará-lo ou fechar o aplicativo."));
         SearchButton.IsEnabled = !busy;
         VersionsButton.IsEnabled = !busy && !active && !tunnel.IsActive && !versionLoading && !selected.Installed;
         InstallPackButton.IsEnabled = !busy && !active && !tunnel.IsActive && PackVersions.SelectedItem != null;
-        InstallPackButton.ToolTip = tunnel.IsActive ? "Pare o agente antes de criar um perfil de modpack." : active ? "Pare o servidor antes de instalar outro perfil." : "Selecione um modpack e uma versão. A instalação cria um perfil Java separado.";
+        LocalizedUi.Set(InstallPackButton, "ToolTip", () => tunnel.IsActive ? Tr("Pare o agente antes de criar um perfil de modpack.") : active ? Tr("Pare o servidor antes de instalar outro perfil.") : Tr("Selecione um modpack e uma versão. A instalação cria um perfil Java separado."));
         PackResults.IsEnabled = !busy; PackVersions.IsEnabled = !busy;
         CommandBox.IsEnabled = runner.State == ServerState.Running;
         SendButton.IsEnabled = runner.State == ServerState.Running;
         if (!CommandBox.IsEnabled) CommandPopup.IsOpen = false;
-        InstalledText.Text = installed ? selected.IsBedrock ? "Bedrock nativo instalado" : $"{selected.Engine} instalado · Java {selected.RequiredJava}+" : "Ainda não instalado";
-        MemoryDetail.Text = selected.IsNative ? "Uso nativo; sem limite de RAM da JVM" : "Limite configurado: " + selected.MemoryMb + " MB";
-        StateText.Text = runner.State switch { ServerState.Starting => "Iniciando…", ServerState.Running => "Ligado", ServerState.Stopping => "Salvando…", _ => "Desligado" };
+        LocalizedUi.Set(InstalledText, "Text", () => installed ? selected.IsBedrock ? Tr("Bedrock nativo instalado") : TrFormat("{0} instalado · Java {1}+", selected.Engine, selected.RequiredJava) : Tr("Ainda não instalado"));
+        LocalizedUi.Set(MemoryDetail, "Text", () => selected.IsNative ? Tr("Uso nativo; sem limite de RAM da JVM") : Tr("Limite configurado: ") + selected.MemoryMb + " MB");
+        LocalizedUi.Set(StateText, "Text", () => runner.State switch { ServerState.Starting => Tr("Iniciando…"), ServerState.Running => Tr("Ligado"), ServerState.Stopping => Tr("Salvando…"), _ => Tr("Desligado") });
         StateText.Foreground = runner.State == ServerState.Running ? (Brush)FindResource("Accent") : Brushes.White;
-        StateDetail.Text = runner.State switch { ServerState.Running => "Entre por localhost:" + selected.Port, ServerState.Starting => "Aguarde a preparação do mundo", ServerState.Stopping => "Encerrando com segurança", _ => installed ? selected.IsTerraria || selected.EulaAccepted ? "Pronto para ligar" : "Revise a EULA para continuar" : "Prepare o servidor em Configurações" };
+        LocalizedUi.Set(StateDetail, "Text", () => runner.State switch { ServerState.Running => Tr("Entre por localhost:") + selected.Port, ServerState.Starting => Tr("Aguarde a preparação do mundo"), ServerState.Stopping => Tr("Encerrando com segurança"), _ => installed ? selected.IsTerraria || selected.EulaAccepted ? Tr("Pronto para ligar") : Tr("Revise a EULA para continuar") : Tr("Prepare o servidor em Configurações") });
         if (GameHome.Visibility == Visibility.Visible)
         {
-            HomeRunStatus.Text = active ? "Servidor em execução: " + selected.Name : "Nenhum servidor em execução.";
+            LocalizedUi.Set(HomeRunStatus, "Text", () => active ? Tr("Servidor em execução: ") + selected.Name : Tr("Nenhum servidor em execução."));
             RefreshGameLibrary();
         }
         ApplyGameLayout();
     }
     private ServerProfile SaveSettings()
     {
-        if (runner.IsActive) throw new InvalidOperationException("Pare o servidor antes de alterar as configurações.");
-        if (selected == null) throw new InvalidOperationException("Selecione um servidor.");
+        if (runner.IsActive) throw new InvalidOperationException(Tr("Pare o servidor antes de alterar as configurações."));
+        if (selected == null) throw new InvalidOperationException(Tr("Selecione um servidor."));
         if (selected.IsTerraria) return SaveTerrariaSettings();
         var p = JsonSerializer.Deserialize<ServerProfile>(JsonSerializer.Serialize(selected))!;
-        if (versionLoading || VersionBox.SelectedItem is not ServerVersion version) throw new InvalidOperationException("Aguarde o catálogo e selecione uma versão disponível.");
+        if (versionLoading || VersionBox.SelectedItem is not ServerVersion version) throw new InvalidOperationException(Tr("Aguarde o catálogo e selecione uma versão disponível."));
         p.Name = NameBox.Text.Trim(); p.MinecraftVersion = version.Id; p.BedrockPreview = version.Preview;
         p.Edition = DraftEdition;
         p.Engine = p.IsBedrock ? "Bedrock" : p.IsCrossplay || EngineBox.SelectedIndex == 1 ? "Fabric" : "Vanilla";
-        if (!int.TryParse(BedrockPortBox.Text, out var bedrockPort)) throw new InvalidDataException("Informe uma porta Bedrock válida.");
+        if (!int.TryParse(BedrockPortBox.Text, out var bedrockPort)) throw new InvalidDataException(Tr("Informe uma porta Bedrock válida."));
         p.BedrockPort = bedrockPort;
         p.JavaPath = JavaBox.Text.Trim(); p.Whitelist = WhitelistCheck.IsChecked == true; p.EulaAccepted = EulaCheck.IsChecked == true;
         if (!int.TryParse(RamBox.Text, out var ram) || !int.TryParse(PortBox.Text, out var port) || !int.TryParse(ViewBox.Text, out var view) ||
-            !int.TryParse(SimulationBox.Text, out var simulation) || !int.TryParse(PlayersBox.Text, out var players)) throw new InvalidDataException("Preencha os campos numéricos com números inteiros.");
+            !int.TryParse(SimulationBox.Text, out var simulation) || !int.TryParse(PlayersBox.Text, out var players)) throw new InvalidDataException(Tr("Preencha os campos numéricos com números inteiros."));
         p.MemoryMb = ram; p.Port = port; p.ViewDistance = view; p.SimulationDistance = simulation; p.MaxPlayers = players;
         if (selected.Installed && (p.Edition != selected.Edition || p.Engine != selected.Engine || p.MinecraftVersion != selected.MinecraftVersion || p.BedrockPreview != selected.BedrockPreview))
-            throw new InvalidOperationException("Para trocar a versão ou o tipo de um servidor instalado, crie outro perfil. Isso preserva seu mundo atual.");
+            throw new InvalidOperationException(Tr("Para trocar a versão ou o tipo de um servidor instalado, crie outro perfil. Isso preserva seu mundo atual."));
         if (!p.Installed && (p.Edition != selected.Edition || p.MinecraftVersion != selected.MinecraftVersion || p.Engine != selected.Engine))
         {
             p.LoaderVersion = ""; p.NativeExecutableSha256 = "";
@@ -601,10 +606,10 @@ public partial class MainWindow : Window
         CancelButton.Visibility = cancellable ? Visibility.Visible : Visibility.Collapsed;
         UpdateControls();
         try { await action(operation.Token); }
-        catch (OperationCanceledException) { SetStatus("Tarefa cancelada. Você pode tentar novamente."); }
+        catch (OperationCanceledException) { SetStatus(() => Tr("Tarefa cancelada. Você pode tentar novamente.")); }
         catch (Exception ex)
         {
-            SetStatus("Falha: " + ex.Message); runner.Message(ex.Message, true);
+            SetStatus(() => "Falha: " + ex.Message); runner.Message(ex.Message, true);
             MessageBox.Show(this, ex.Message, "NandoHost", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         finally
@@ -613,23 +618,24 @@ public partial class MainWindow : Window
             UpdateControls();
         }
     }
-    private void SetStatus(string text) { StatusText.Text = text; StatusText.ToolTip = text; }
-    private IProgress<string> Progress() => new Progress<string>(message => { SetStatus(message); runner.Message(message); });
+    private void SetStatus(string text) => SetStatus(() => text);
+    private void SetStatus(Func<string> text) { LocalizedUi.Set(StatusText, "Text", () => text()); LocalizedUi.Set(StatusText, "ToolTip", () => text()); }
+    private IProgress<string> Progress() => new Progress<string>(message => { SetStatus(() => message); runner.Message(message); });
     private void NewServerClick(object sender, RoutedEventArgs e)
     {
         if (currentGame == "Terraria")
         {
             var profile = NewTerrariaProfile(); profiles.Add(profile); store.Save(profiles); ServerList.SelectedItem = profile;
-            Navigate(3); SetStatus("Configure o novo mundo Terraria e instale o servidor."); return;
+            Navigate(3); SetStatus(() => Tr("Configure o novo mundo Terraria e instale o servidor.")); return;
         }
         var edition = DraftEdition;
         var choice = VersionBox.Items.OfType<ServerVersion>().FirstOrDefault(v => !v.Preview);
-        var p = new ServerProfile { Name = "Novo servidor " + (profiles.Count + 1), Edition = edition,
+        var p = new ServerProfile { Name = Tr("Novo servidor ") + (profiles.Count + 1), Edition = edition,
             Engine = edition == "Bedrock" ? "Bedrock" : edition == "Crossplay" ? "Fabric" : "Vanilla",
             Port = NextPort(edition), BedrockPort = NextPort("Bedrock"), MinecraftVersion = choice?.Id ?? "1.21.1",
             JavaPath = selected?.JavaPath ?? "java" };
         profiles.Add(p); store.Save(profiles); ServerList.SelectedItem = p; Navigate(3);
-        SetStatus("Configure e instale seu novo servidor.");
+        SetStatus(() => Tr("Configure e instale seu novo servidor."));
     }
     private int NextPort(string edition = "Java")
     {
@@ -638,20 +644,20 @@ public partial class MainWindow : Window
         while ((used.Contains(port) || edition == "Bedrock" && used.Contains(port + 1)) && port < 65534) port++;
         return port;
     }
-    private async void SaveClick(object sender, RoutedEventArgs e) => await Guard(_ => { SaveSettings(); SetStatus("Configurações salvas."); return Task.CompletedTask; });
+    private async void SaveClick(object sender, RoutedEventArgs e) => await Guard(_ => { SaveSettings(); SetStatus(() => Tr("Configurações salvas.")); return Task.CompletedTask; });
     private async void InstallClick(object sender, RoutedEventArgs e) => await Guard(async ct =>
     {
         var p = SaveSettings();
         var folder = store.ServerRoot(p);
         if (File.Exists(Path.Combine(folder, p.LaunchJar)))
         {
-            SetStatus("Criando backup antes de reinstalar…");
+            SetStatus(() => Tr("Criando backup antes de reinstalar…"));
             await store.BackupAsync(p, ct);
         }
         try { await new Installer(downloads).InstallAsync(p, folder, Progress(), ct); }
         finally { store.Save(profiles); }
         store.WriteProperties(p); store.Save(profiles); Navigate(0);
-        SetStatus(p.IsTerraria ? "Terraria instalado. O primeiro início criará o mundo configurado." : $"{p.EditionLabel} instalado. Confira a EULA e os requisitos antes de ligar.");
+        SetStatus(() => p.IsTerraria ? Tr("Terraria instalado. O primeiro início criará o mundo configurado.") : TrFormat("{0} instalado. Confira a EULA e os requisitos antes de ligar.", p.EditionLabel));
     });
     private async void StartClick(object sender, RoutedEventArgs e)
     {
@@ -659,38 +665,38 @@ public partial class MainWindow : Window
         if (!selected.Installed || !File.Exists(Path.Combine(store.ServerRoot(selected), selected.LaunchJar)))
         {
             Navigate(3); SettingsScroll.ScrollToTop();
-            SetStatus("Escolha as opções e a versão, depois use Baixar e instalar."); return;
+            SetStatus(() => Tr("Escolha as opções e a versão, depois use Baixar e instalar.")); return;
         }
         if (!selected.IsTerraria && !selected.EulaAccepted)
         {
             Navigate(3); UpdateLayout(); EulaCheck.BringIntoView(); EulaCheck.Focus();
-            SetStatus("Leia a EULA. Se concordar, marque a aceitação e salve as configurações."); return;
+            SetStatus(() => Tr("Leia a EULA. Se concordar, marque a aceitação e salve as configurações.")); return;
         }
         await Guard(async ct =>
         {
             var p = SaveSettings();
-            SetStatus(p.IsNative ? "Verificando arquivos e iniciando o servidor nativo…" : "Verificando Java e iniciando o servidor…");
+            SetStatus(() => p.IsNative ? Tr("Verificando arquivos e iniciando o servidor nativo…") : Tr("Verificando Java e iniciando o servidor…"));
             await runner.StartAsync(p, store.ServerRoot(p), ct);
             lastCpu = TimeSpan.Zero; lastCpuAt = DateTime.UtcNow;
-            Navigate(0); SetStatus("Processo iniciado. Aguarde o estado Ligado no painel; isso não confirma acesso externo.");
+            Navigate(0); SetStatus(() => Tr("Processo iniciado. Aguarde o estado Ligado no painel; isso não confirma acesso externo."));
         });
     }
     private async void StopClick(object sender, RoutedEventArgs e) => await Guard(async _ =>
     {
-        SetStatus("Salvando o mundo e parando o servidor…");
+        SetStatus(() => Tr("Salvando o mundo e parando o servidor…"));
         var stopped = await runner.StopAsync();
-        SetStatus(stopped ? "Servidor encerrado." : "Ainda encerrando. Aguarde ou use Encerrar à força.");
+        SetStatus(() => stopped ? Tr("Servidor encerrado.") : Tr("Ainda encerrando. Aguarde ou use Encerrar à força."));
     }, false);
     private void ForceClick(object sender, RoutedEventArgs e)
     {
-        if (MessageBox.Show(this, "Encerrar à força pode perder alterações recentes do mundo. Continuar?", "Encerrar servidor", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes) runner.ForceStop();
+        if (MessageBox.Show(this, Tr("Encerrar à força pode perder alterações recentes do mundo. Continuar?"), Tr("Encerrar servidor"), MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes) runner.ForceStop();
     }
     private async void BackupClick(object sender, RoutedEventArgs e) => await Guard(async ct =>
     {
-        if (runner.IsActive) throw new InvalidOperationException("Pare o servidor antes do backup.");
-        SetStatus("Criando backup…");
+        if (runner.IsActive) throw new InvalidOperationException(Tr("Pare o servidor antes do backup."));
+        SetStatus(() => Tr("Criando backup…"));
         var file = await store.BackupAsync(selected!, ct);
-        SetStatus("Backup salvo: " + Path.GetFileName(file)); runner.Message("Backup: " + file);
+        SetStatus(() => Tr("Backup salvo: ") + Path.GetFileName(file)); runner.Message(Tr("Backup: ") + file);
         OpenFolder(Path.GetDirectoryName(file)!);
     });
     private void FolderClick(object sender, RoutedEventArgs e)
@@ -713,7 +719,7 @@ public partial class MainWindow : Window
             editingCommand = true; CommandBox.Clear(); editingCommand = false;
             CommandBox.Focus();
         }
-        catch (Exception ex) { SetStatus(ex.Message); }
+        catch (Exception ex) { SetStatus(() => ex.Message); }
     }
     private void RefreshSuggestions(bool force = false)
     {
@@ -788,21 +794,21 @@ public partial class MainWindow : Window
     private async Task SearchPacks() => await Guard(async ct =>
     {
         versionRequest?.Cancel(); PackVersions.ItemsSource = null; PackResults.ItemsSource = null;
-        PackEmptyState.Visibility = Visibility.Visible; PackEmptyTitle.Text = "Buscando modpacks…";
-        PackEmptyDetail.Text = "Consultando o catálogo Modrinth.";
-        SetStatus("Buscando no Modrinth…");
+        PackEmptyState.Visibility = Visibility.Visible; LocalizedUi.Set(PackEmptyTitle, "Text", () => Tr("Buscando modpacks…"));
+        LocalizedUi.Set(PackEmptyDetail, "Text", () => Tr("Consultando o catálogo Modrinth."));
+        SetStatus(() => Tr("Buscando no Modrinth…"));
         System.Collections.Generic.IReadOnlyList<PackHit> hits;
         try { hits = await new Modpacks(downloads).SearchAsync(PackQuery.Text.Trim(), ct); }
         catch
         {
-            PackEmptyTitle.Text = "A busca não terminou";
-            PackEmptyDetail.Text = "Confira a conexão e tente novamente. Seus perfis foram preservados."; throw;
+            LocalizedUi.Set(PackEmptyTitle, "Text", () => Tr("A busca não terminou"));
+            LocalizedUi.Set(PackEmptyDetail, "Text", () => Tr("Confira a conexão e tente novamente. Seus perfis foram preservados.")); throw;
         }
         PackResults.ItemsSource = hits;
         PackEmptyState.Visibility = hits.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        PackEmptyTitle.Text = "Nenhum modpack encontrado";
-        PackEmptyDetail.Text = "Tente outro nome ou importe um pacote que você já baixou.";
-        SetStatus($"{hits.Count} modpacks encontrados. Escolha um para ver as versões.");
+        LocalizedUi.Set(PackEmptyTitle, "Text", () => Tr("Nenhum modpack encontrado"));
+        LocalizedUi.Set(PackEmptyDetail, "Text", () => Tr("Tente outro nome ou importe um pacote que você já baixou."));
+        SetStatus(() => TrFormat("{0} modpacks encontrados. Escolha um para ver as versões.", hits.Count));
     });
     private async void PackSelected(object sender, SelectionChangedEventArgs e)
     {
@@ -812,21 +818,21 @@ public partial class MainWindow : Window
         PackVersions.ItemsSource = null; InstallPackButton.IsEnabled = false;
         try
         {
-            SetStatus("Carregando versões do modpack…");
+            SetStatus(() => Tr("Carregando versões do modpack…"));
             var versions = await new Modpacks(downloads).VersionsAsync(hit.Id, request.Token);
             if (request.IsCancellationRequested) return;
             PackVersions.ItemsSource = versions; PackVersions.SelectedIndex = versions.Count > 0 ? 0 : -1;
-            UpdateControls(); SetStatus("Escolha a versão. Pacotes Fabric têm instalação automática nesta prévia.");
+            UpdateControls(); SetStatus(() => Tr("Escolha a versão. Pacotes Fabric têm instalação automática nesta prévia."));
         }
         catch (OperationCanceledException) { }
-        catch (Exception ex) { SetStatus(ex.Message); }
+        catch (Exception ex) { SetStatus(() => ex.Message); }
         finally { if (versionRequest == request) versionRequest = null; request.Dispose(); }
     }
     private async void InstallPackClick(object sender, RoutedEventArgs e) => await Guard(async ct =>
     {
         if (PackVersions.SelectedItem is not PackVersion version) return;
         var cache = SafePaths.Inside(store.Root, "cache/" + SafePaths.Token(version.Id) + ".mrpack");
-        SetStatus("Baixando pacote do Modrinth…");
+        SetStatus(() => Tr("Baixando pacote do Modrinth…"));
         try
         {
             await new Modpacks(downloads).DownloadAsync(version.Id, cache, ct);
@@ -836,26 +842,26 @@ public partial class MainWindow : Window
     });
     private async void ImportMrClick(object sender, RoutedEventArgs e)
     {
-        var dialog = new OpenFileDialog { Filter = "Modpack Modrinth (*.mrpack)|*.mrpack", CheckFileExists = true };
+        var dialog = new OpenFileDialog { Filter = Tr("Modpack Modrinth (*.mrpack)|*.mrpack"), CheckFileExists = true };
         if (dialog.ShowDialog(this) != true) return;
         await Guard(ct => ImportMrAsync(dialog.FileName, ct));
     }
     private async Task ImportMrAsync(string file, CancellationToken ct)
     {
-        if (runner.IsActive || tunnel.IsActive) throw new InvalidOperationException("Pare o servidor e o agente antes de instalar um modpack.");
+        if (runner.IsActive || tunnel.IsActive) throw new InvalidOperationException(Tr("Pare o servidor e o agente antes de instalar um modpack."));
         var info = Modpacks.Inspect(file);
         var p = new ServerProfile { Name = info.Name.Length > 64 ? info.Name[..64] : info.Name, PackName = info.Name, MinecraftVersion = info.Minecraft, Engine = info.Engine, LoaderVersion = info.Loader, Port = NextPort(), JavaPath = selected?.JavaPath ?? "java" };
         ProfileStore.Validate(p);
         var staging = SafePaths.Inside(store.Root, "staging/" + p.Id);
         try
         {
-            SetStatus("Preparando modpack em uma pasta temporária…");
+            SetStatus(() => Tr("Preparando modpack em uma pasta temporária…"));
             await new Modpacks(downloads).ImportAsync(file, staging, Progress(), ct);
             await new Installer(downloads).InstallAsync(p, staging, Progress(), ct);
             Directory.CreateDirectory(Path.GetDirectoryName(store.ServerRoot(p))!);
             Directory.Move(staging, store.ServerRoot(p));
             profiles.Add(p); store.WriteProperties(p); store.Save(profiles); ServerList.SelectedItem = p;
-            Navigate(3); SetStatus("Modpack instalado. Confira a RAM, o Java e a EULA antes de ligar.");
+            Navigate(3); SetStatus(() => Tr("Modpack instalado. Confira a RAM, o Java e a EULA antes de ligar."));
         }
         finally { DeleteStaging(staging); }
     }
@@ -865,7 +871,7 @@ public partial class MainWindow : Window
         var stagingRoot = Path.GetFullPath(Path.Combine(store.Root, "staging")) + Path.DirectorySeparatorChar;
         var absolute = Path.GetFullPath(path);
         if (!absolute.StartsWith(stagingRoot, StringComparison.OrdinalIgnoreCase) || !Guid.TryParseExact(Path.GetFileName(absolute), "N", out _))
-            throw new InvalidOperationException("Pasta temporária inválida.");
+            throw new InvalidOperationException(Tr("Pasta temporária inválida."));
         SafePaths.RejectLink(absolute);
         if (Directory.Exists(absolute)) Directory.Delete(absolute, true);
     }
@@ -884,7 +890,7 @@ public partial class MainWindow : Window
                 await Modpacks.ImportCurseServerZipAsync(dialog.FileName, staging, Progress(), ct);
                 Directory.CreateDirectory(Path.GetDirectoryName(store.ServerRoot(p))!);
                 Directory.Move(staging, store.ServerRoot(p)); profiles.Add(p); store.Save(profiles); ServerList.SelectedItem = p;
-                Navigate(3); SetStatus("Arquivos importados. Informe a versão Minecraft e use Fabric. Pacotes Forge/NeoForge ainda não são executados nesta prévia.");
+                Navigate(3); SetStatus(() => Tr("Arquivos importados. Informe a versão Minecraft e use Fabric. Pacotes Forge/NeoForge ainda não são executados nesta prévia."));
             }
             finally { DeleteStaging(staging); }
         });
@@ -899,37 +905,37 @@ public partial class MainWindow : Window
     {
         if (selected == null) return;
         var address = PublicAddressBox.Text.Trim();
-        if (address.Any(c => char.IsWhiteSpace(c) || c is '/' or '\\')) { SetStatus("Use somente o endereço do servidor, sem http:// ou espaços."); return; }
-        selected.PublicAddress = address; store.Save(profiles); SetStatus("Endereço salvo. A conexão externa ainda precisa estar configurada no túnel ou roteador.");
+        if (address.Any(c => char.IsWhiteSpace(c) || c is '/' or '\\')) { SetStatus(() => Tr("Use somente o endereço do servidor, sem http:// ou espaços.")); return; }
+        selected.PublicAddress = address; store.Save(profiles); SetStatus(() => Tr("Endereço salvo. A conexão externa ainda precisa estar configurada no túnel ou roteador."));
     }
-    private void CopyLocalClick(object sender, RoutedEventArgs e) { Clipboard.SetText(LocalAddress.Text); SetStatus("Endereço local copiado."); }
+    private void CopyLocalClick(object sender, RoutedEventArgs e) { Clipboard.SetText(LocalAddress.Text); SetStatus(() => Tr("Endereço local copiado.")); }
     private void CopyPublicClick(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(PublicAddressBox.Text)) { SetStatus("Informe o endereço público primeiro."); return; }
-        Clipboard.SetText(PublicAddressBox.Text.Trim()); SetStatus("Endereço copiado.");
+        if (string.IsNullOrWhiteSpace(PublicAddressBox.Text)) { SetStatus(() => Tr("Informe o endereço público primeiro.")); return; }
+        Clipboard.SetText(PublicAddressBox.Text.Trim()); SetStatus(() => Tr("Endereço copiado."));
     }
     private static void Website(string url) => Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
     private void EulaWebsiteClick(object sender, RoutedEventArgs e) => Website("https://www.minecraft.net/en-us/eula");
     private void CurseWebsiteClick(object sender, RoutedEventArgs e) => Website("https://www.curseforge.com/minecraft/search?class=modpacks");
     private async void DownloadAgentClick(object sender, RoutedEventArgs e) => await Guard(async ct =>
     {
-        SetStatus("Baixando o agente portátil oficial e verificando SHA-256…");
+        SetStatus(() => Tr("Baixando o agente portátil oficial e verificando SHA-256…"));
         await downloads.FileAsync(PlayitAgent.DownloadUrl, AgentFile, PlayitAgent.Hash, "SHA256", 40 * 1024 * 1024, ct);
-        TunnelDetailText.Text = "Agente verificado. Clique em Iniciar agente para vincular sua conta.";
-        SetStatus("Agente oficial pronto. Nenhum serviço do Windows foi instalado.");
+        LocalizedUi.Set(TunnelDetailText, "Text", () => Tr("Agente verificado. Clique em Iniciar agente para vincular sua conta."));
+        SetStatus(() => Tr("Agente oficial pronto. Nenhum serviço do Windows foi instalado."));
     });
     private async void StartAgentClick(object sender, RoutedEventArgs e) => await Guard(async ct =>
     {
         PreparePrivateTunnelFolder();
         claimUrl = null;
-        TunnelDetailText.Text = "Iniciando. Aguarde o botão de vinculação ou configure seu túnel no site.";
+        LocalizedUi.Set(TunnelDetailText, "Text", () => Tr("Iniciando. Aguarde o botão de vinculação ou configure seu túnel no site."));
         await tunnel.StartAsync(AgentFile, TunnelFolder, selected!.Port, ct, selected.IsCrossplay ? selected.BedrockPort : null);
-        SetStatus("Agente iniciado. Vincule sua conta e configure as entradas da edição selecionada no site.");
+        SetStatus(() => Tr("Agente iniciado. Vincule sua conta e configure as entradas da edição selecionada no site."));
     });
     private async void StopAgentClick(object sender, RoutedEventArgs e) => await Guard(async _ =>
     {
         await tunnel.StopAsync(); claimUrl = null;
-        SetStatus("Agente parado. O servidor local pode continuar funcionando.");
+        SetStatus(() => Tr("Agente parado. O servidor local pode continuar funcionando."));
     }, false);
     private void ClaimAgentClick(object sender, RoutedEventArgs e)
     {
@@ -941,7 +947,7 @@ public partial class MainWindow : Window
         SafePaths.RejectLink(TunnelFolder);
         Directory.CreateDirectory(TunnelFolder);
         var owner = System.Security.Principal.WindowsIdentity.GetCurrent().User
-            ?? throw new InvalidOperationException("Não foi possível proteger a credencial do agente.");
+            ?? throw new InvalidOperationException(Tr("Não foi possível proteger a credencial do agente."));
         var acl = new System.Security.AccessControl.DirectorySecurity();
         acl.SetAccessRuleProtection(true, false);
         acl.AddAccessRule(new System.Security.AccessControl.FileSystemAccessRule(owner,
@@ -967,18 +973,18 @@ public partial class MainWindow : Window
     private async void OnClosing(object? sender, CancelEventArgs e)
     {
         if (closed) return;
-        if (busy) { e.Cancel = true; operation?.Cancel(); SetStatus("Aguarde a tarefa terminar antes de fechar."); return; }
+        if (busy) { e.Cancel = true; operation?.Cancel(); SetStatus(() => Tr("Aguarde a tarefa terminar antes de fechar.")); return; }
         if (runner.IsActive)
         {
             e.Cancel = true;
             if (closing) return;
-            var choice = MessageBox.Show(this, "Deseja manter o servidor ligado na bandeja?\n\nSim: continuar hospedando.\nNão: salvar, parar e sair.", "Fechar NandoHost", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+            var choice = MessageBox.Show(this, Tr("Deseja manter o servidor ligado na bandeja?\n\nSim: continuar hospedando.\nNão: salvar, parar e sair."), Tr("Fechar NandoHost"), MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
             if (choice == MessageBoxResult.Yes) { WindowState = WindowState.Minimized; return; }
             if (choice != MessageBoxResult.No) return;
             closing = true;
             await Guard(async _ =>
             {
-                SetStatus("Salvando o mundo antes de sair…");
+                SetStatus(() => Tr("Salvando o mundo antes de sair…"));
                 if (!await runner.StopAsync()) return;
                 for (var i = 0; i < 50 && runner.IsActive; i++) await Task.Delay(100);
             }, false);

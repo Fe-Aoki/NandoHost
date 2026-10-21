@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using NandoHost.Core;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.App;
 
@@ -24,23 +25,23 @@ public partial class MainWindow
         JavaFields.Visibility = bedrock ? Visibility.Collapsed : Visibility.Visible;
         CrossplayPortPanel.Visibility = crossplay ? Visibility.Visible : Visibility.Collapsed;
         RamBox.Visibility = bedrock ? Visibility.Collapsed : Visibility.Visible;
-        RamCaption.Text = bedrock ? "RAM: automática no servidor nativo" : "RAM máxima (MB)";
-        PortCaption.Text = bedrock ? "Porta Bedrock (confira o transporte)" : "Porta Java (TCP)";
+        LocalizedUi.Set(RamCaption, "Text", () => bedrock ? Tr("RAM: automática no servidor nativo") : Tr("RAM máxima (MB)"));
+        LocalizedUi.Set(PortCaption, "Text", () => bedrock ? Tr("Porta Bedrock (confira o transporte)") : Tr("Porta Java (TCP)"));
         if (bedrock) EngineBox.SelectedIndex = 2;
         else if (crossplay) EngineBox.SelectedIndex = 1;
         else if (EngineBox.SelectedIndex == 2) EngineBox.SelectedIndex = 0;
         EngineBox.IsEnabled = !bedrock && !crossplay && selected?.Installed != true;
-        EditionHint.Text = DraftEdition switch
+        LocalizedUi.Set(EditionHint, "Text", () => DraftEdition switch
         {
-            "Bedrock" => "Servidor dedicado oficial para Windows. Sem Java. O catálogo oferece a versão estável atual e, quando disponível, Preview. O pacote atual usa NetherNet; não há histórico oficial completo para download.",
-            "Crossplay" => "Fabric + Geyser + Floodgate + Fabric API. Apenas versões compatíveis com o Geyser atual. Geyser publica builds de desenvolvimento; clientes Bedrock também precisam de uma versão suportada.",
-            _ => "Vanilla ou Fabric, com versões de lançamento do catálogo oficial. O Java necessário depende da versão escolhida."
-        };
-        WhitelistHelp.Text = bedrock
-            ? "No console: allowlist add \"Seu Gamertag\". A autenticação Xbox permanece ativada."
-            : crossplay ? "No console: whitelist add NomeJava. Para Bedrock, use o nome com o prefixo do Floodgate (normalmente .). Autenticação Java permanece ativada; assinatura obrigatória de chat é desativada para compatibilidade."
-            : "No console: whitelist add NomeDoJogador. A autenticação oficial permanece ativada.";
-        WhitelistCheck.Content = bedrock ? "Permitir apenas contas da allowlist" : "Permitir apenas jogadores da whitelist";
+            "Bedrock" => Tr("Servidor dedicado oficial para Windows. Sem Java. O catálogo oferece a versão estável atual e, quando disponível, Preview. O pacote atual usa NetherNet; não há histórico oficial completo para download."),
+            "Crossplay" => Tr("Fabric + Geyser + Floodgate + Fabric API. Apenas versões compatíveis com o Geyser atual. Geyser publica builds de desenvolvimento; clientes Bedrock também precisam de uma versão suportada."),
+            _ => Tr("Vanilla ou Fabric, com versões de lançamento do catálogo oficial. O Java necessário depende da versão escolhida.")
+        });
+        LocalizedUi.Set(WhitelistHelp, "Text", () => bedrock
+            ? Tr("No console: allowlist add \"Seu Gamertag\". A autenticação Xbox permanece ativada.")
+            : crossplay ? Tr("No console: whitelist add NomeJava. Para Bedrock, use o nome com o prefixo do Floodgate (normalmente .). Autenticação Java permanece ativada; assinatura obrigatória de chat é desativada para compatibilidade.")
+            : Tr("No console: whitelist add NomeDoJogador. A autenticação oficial permanece ativada."));
+        LocalizedUi.Set(WhitelistCheck, "Content", () => bedrock ? Tr("Permitir apenas contas da allowlist") : Tr("Permitir apenas jogadores da whitelist"));
         ApplyGameLayout();
     }
     private async void EditionSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -64,7 +65,7 @@ public partial class MainWindow
         if (selected?.Installed == true && selected.Edition == DraftEdition)
         {
             editionVersionsRequest = null; versionLoading = false;
-            VersionStatusText.Text = "Versão preservada neste perfil. Para outra edição ou versão, use Novo servidor.";
+            LocalizedUi.Set(VersionStatusText, "Text", () => Tr("Versão preservada neste perfil. Para outra edição ou versão, use Novo servidor."));
             UpdateControls(); return;
         }
         var request = new CancellationTokenSource(); editionVersionsRequest = request;
@@ -72,7 +73,7 @@ public partial class MainWindow
         var current = (VersionBox.SelectedItem as ServerVersion)?.Id;
         var currentPreview = (VersionBox.SelectedItem as ServerVersion)?.Preview ?? false;
         if (selected?.Edition != edition) current = null;
-        versionLoading = true; VersionStatusText.Text = "Carregando versões oficiais…"; UpdateControls();
+        versionLoading = true; LocalizedUi.Set(VersionStatusText, "Text", () => Tr("Carregando versões oficiais…")); UpdateControls();
         try
         {
             if (force) catalog.Refresh();
@@ -87,16 +88,16 @@ public partial class MainWindow
             }
             VersionBox.ItemsSource = choices;
             VersionBox.SelectedItem = chosen ?? choices.FirstOrDefault(v => !v.Preview) ?? choices[0];
-            VersionStatusText.Text = edition == "Bedrock" ? $"{choices.Count} opção(ões) oficiais para Windows. Preview exige cliente Preview."
-                : $"{choices.Count} versão(ões) disponíveis. Abra a lista para escolher.";
+            LocalizedUi.Set(VersionStatusText, "Text", () => edition == "Bedrock" ? TrFormat("{0} opção(ões) oficiais para Windows. Preview exige cliente Preview.", choices.Count)
+                : TrFormat("{0} versão(ões) disponíveis. Abra a lista para escolher.", choices.Count));
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             if (!request.IsCancellationRequested)
             {
-                VersionStatusText.Text = "Não foi possível atualizar: " + ex.Message + " Use Atualizar versões para tentar novamente.";
-                SetStatus(VersionStatusText.Text);
+                LocalizedUi.Set(VersionStatusText, "Text", () => Tr("Não foi possível atualizar: ") + ex.Message + Tr(" Use Atualizar versões para tentar novamente."));
+                SetStatus(() => VersionStatusText.Text);
                 // An installed profile remains usable offline; a new edition cannot use a stale list.
                 if (selected?.Edition != edition) VersionBox.ItemsSource = null;
             }
@@ -139,12 +140,12 @@ public partial class MainWindow
     {
         if (selected == null) return;
         var address = BedrockPublicBox.Text.Trim();
-        if (address.Any(c => char.IsWhiteSpace(c) || c is '/' or '\\')) { SetStatus("Use somente endereço e porta, sem espaços ou http://."); return; }
-        selected.BedrockPublicAddress = address; store.Save(profiles); SetStatus("Endereço Bedrock salvo. Salvar não verifica acesso externo.");
+        if (address.Any(c => char.IsWhiteSpace(c) || c is '/' or '\\')) { SetStatus(() => Tr("Use somente endereço e porta, sem espaços ou http://.")); return; }
+        selected.BedrockPublicAddress = address; store.Save(profiles); SetStatus(() => Tr("Endereço Bedrock salvo. Salvar não verifica acesso externo."));
     }
     private void CopyBedrockAddressClick(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(BedrockPublicBox.Text)) { SetStatus("Informe o endereço Bedrock primeiro."); return; }
-        Clipboard.SetText(BedrockPublicBox.Text.Trim()); SetStatus("Endereço Bedrock copiado.");
+        if (string.IsNullOrWhiteSpace(BedrockPublicBox.Text)) { SetStatus(() => Tr("Informe o endereço Bedrock primeiro.")); return; }
+        Clipboard.SetText(BedrockPublicBox.Text.Trim()); SetStatus(() => Tr("Endereço Bedrock copiado."));
     }
 }

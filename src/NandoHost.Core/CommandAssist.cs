@@ -1,4 +1,5 @@
-﻿namespace NandoHost.Core;
+using static NandoHost.Core.Localizer;
+namespace NandoHost.Core;
 
 public sealed record CommandCompletion(string Text, int Caret, string Label, string Description);
 
@@ -78,7 +79,7 @@ public static class CommandAssist
         }
         var candidates = parent?.Players == true
             ? (players ?? []).Where(p => ValidPlayer(p) || edition == "Crossplay" && p.StartsWith('.') && ValidPlayer(p[1..])).Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(p => p, StringComparer.OrdinalIgnoreCase).Select(p => new Node(p, "Nome conhecido pelo painel")).ToArray()
+                .OrderBy(p => p, StringComparer.OrdinalIgnoreCase).Select(p => new Node(p, Tr("Nome conhecido pelo painel"))).ToArray()
             : children;
         var end = caret;
         while (end < text.Length && !char.IsWhiteSpace(text[end])) end++;
@@ -90,7 +91,7 @@ public static class CommandAssist
                 var prefix = (slash ? "/" : "") + label;
                 if (n.Usage.Length > 0 || n.Children is { Length: > 0 }) prefix += " ";
                 var tail = prefix.EndsWith(' ') ? suffix.TrimStart() : suffix;
-                return new CommandCompletion(prefix + tail, prefix.Length, label, n.Description + (n.Usage.Length > 0 ? " · " + n.Usage : ""));
+                return new CommandCompletion(prefix + tail, prefix.Length, label, Tr(n.Description) + (n.Usage.Length > 0 ? " · " + Tr(n.Usage) : ""));
             }).ToArray();
     }
     private static bool ValidPlayer(string value) => value.Length is >= 1 and <= 16 && value.All(c => char.IsAsciiLetterOrDigit(c) || c == '_');

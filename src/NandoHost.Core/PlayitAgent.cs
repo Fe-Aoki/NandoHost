@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.Core;
 
@@ -18,13 +19,13 @@ public static partial class TunnelOutput
     {
         if (line.Length > 4096) return null;
         var claim = Claim().Match(line);
-        if (claim.Success) return new("Aguardando sua autorização no navegador.", claim.Value);
+        if (claim.Success) return new(Tr("Aguardando sua autorização no navegador."), claim.Value);
         var mapping = Mapping().Match(line);
         if (mapping.Success && int.TryParse(mapping.Groups["port"].Value, out var target) && target == port)
-            return new("Endereço informado pelo agente; peça a um amigo para testar a entrada.", Address: mapping.Groups["address"].Value, LocalPort: target);
-        if (line.Contains("tunnel running", StringComparison.OrdinalIgnoreCase)) return new("Relay iniciado pelo agente. A entrada no jogo ainda precisa ser testada.");
+            return new(Tr("Endereço informado pelo agente; peça a um amigo para testar a entrada."), Address: mapping.Groups["address"].Value, LocalPort: target);
+        if (line.Contains("tunnel running", StringComparison.OrdinalIgnoreCase)) return new(Tr("Relay iniciado pelo agente. A entrada no jogo ainda precisa ser testada."));
         if (line.Contains("error", StringComparison.OrdinalIgnoreCase) || line.Contains("failed", StringComparison.OrdinalIgnoreCase))
-            return new("O agente relatou uma falha. Confira sua internet e a configuração no playit.");
+            return new(Tr("O agente relatou uma falha. Confira sua internet e a configuração no playit."));
         return null;
     }
 }
@@ -46,13 +47,13 @@ public sealed class PlayitAgent : IDisposable
     public async Task StartAsync(string executable, string privateFolder, int port, CancellationToken ct = default, int? secondaryPort = null)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
-        if (IsActive) throw new InvalidOperationException("O agente já está em execução.");
-        if (port is < 1024 or > 65535) throw new InvalidDataException("Porta inválida.");
+        if (IsActive) throw new InvalidOperationException(Tr("O agente já está em execução."));
+        if (port is < 1024 or > 65535) throw new InvalidDataException(Tr("Porta inválida."));
         SafePaths.RejectLink(privateFolder); SafePaths.RejectLink(executable);
         await using (var file = File.OpenRead(executable))
         {
             if (!Convert.ToHexString(await SHA256.HashDataAsync(file, ct)).Equals(expectedHash, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException("Agente alterado ou versão incompatível. Baixe novamente pelo painel.");
+                throw new InvalidDataException(Tr("Agente alterado ou versão incompatível. Baixe novamente pelo painel."));
         }
         var info = new ProcessStartInfo(Path.GetFullPath(executable))
         {
@@ -63,7 +64,7 @@ public sealed class PlayitAgent : IDisposable
         info.ArgumentList.Add("--stdout"); info.ArgumentList.Add("start");
         foreach (var key in new[] { "PLAYIT_SECRET", "PLAYIT_SECRET_PATH", "API_BASE", "PLAYIT_LOG" }) info.Environment.Remove(key);
         info.Environment["PLAYIT_LOG"] = "info";
-        var child = Process.Start(info) ?? throw new InvalidOperationException("Não foi possível iniciar o agente.");
+        var child = Process.Start(info) ?? throw new InvalidOperationException(Tr("Não foi possível iniciar o agente."));
         process = child;
         child.StandardInput.Close();
         completion = ObserveAsync(child, port, secondaryPort);
@@ -76,7 +77,7 @@ public sealed class PlayitAgent : IDisposable
         {
             if (process == child) process = null;
             child.Dispose();
-            Notice?.Invoke(new("Agente parado. O endereço externo depende do agente ligado."));
+            Notice?.Invoke(new(Tr("Agente parado. O endereço externo depende do agente ligado.")));
             Changed?.Invoke();
         }
     }

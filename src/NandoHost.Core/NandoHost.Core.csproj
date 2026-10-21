@@ -4,4 +4,5 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup><EmbeddedResource Include="Localization/en-US.json" /></ItemGroup>
 </Project>

@@ -10,7 +10,7 @@
 <p align="center">
   <img src="docs/images/badges/windows.svg" alt="Windows" />
   <img src="docs/images/badges/dotnet.svg" alt="C# · WPF · .NET 10" />
-  <img src="docs/images/badges/version.svg" alt="Prévia 0.8.9" />
+  <img src="docs/images/badges/version.svg" alt="Prévia 0.9.0" />
   <img src="docs/images/badges/private.svg" alt="Repositório privado" />
 </p>
 
@@ -27,7 +27,7 @@
 
 O **NandoHost** reúne instalação, console, mods, métricas e backups para hospedar jogos no seu próprio computador. Você pode jogar enquanto o servidor está ligado, respeitando os recursos disponíveis na máquina.
 
-**Projeto em desenvolvimento · versão 0.8.9 · repositório privado.** A apresentação acompanha a identidade do aplicativo: azul profundo, dourado e as paisagens dos seus jogos.
+**Projeto em desenvolvimento · versão 0.9.0 · repositório privado.** A apresentação acompanha a identidade do aplicativo: azul profundo, dourado e as paisagens dos seus jogos.
 
 ## Recursos
 
@@ -39,6 +39,12 @@ O **NandoHost** reúne instalação, console, mods, métricas e backups para hos
 - Protótipo de gerenciamento do agente playit para acesso externo.
 
 Os mundos e os dados dos servidores ficam no computador do usuário. O painel não é uma hospedagem na nuvem nem uma plataforma social. Os downloads dos servidores dependem das fontes oficiais e da conexão com a internet. Forge, NeoForge, Quilt e alguns formatos de pacotes ainda têm limitações; veja [o estado do projeto](docs/STATUS.md).
+
+## Idiomas
+
+Selecione **Português (Brasil)** ou **English** na barra superior. A mudança não exige reiniciar, fica salva para a próxima abertura e preserva os campos que você está editando. Nomes de servidores e mundos, comandos e logs dos jogos mantêm o conteúdo original.
+
+Veja [como os idiomas funcionam](docs/LOCALIZATION.md).
 
 ## Interface
 
@@ -90,6 +96,9 @@ Para gerar um ZIP limpo de distribuição:
 O pacote fica em `dist`. A montagem usa uma pasta temporária nova e copia somente executáveis do aplicativo, recursos necessários e avisos de terceiros. Não empacota `Data`, mundos ou credenciais.
 
 ## Verificação
+
+Na **0.9.0**, os **60 testes do núcleo passaram sem falhas**, incluindo persistência do idioma, parâmetros, preservação de dados e comandos. Os testes de interface também conferiram a troca nos dois sentidos, campos e senhas em edição, histórico de comandos e bloqueios durante tarefas. Veja [o relatório](docs/validation/LOCALIZATION-0.9.0.md).
+
 
 Na organização inicial da **0.8.9**, os **56 testes padrão do núcleo passaram sem falhas**. Compilação, pacote, biblioteca e redimensionamento também foram conferidos na nova estrutura.
 

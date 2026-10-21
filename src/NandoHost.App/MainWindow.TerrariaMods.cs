@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Win32;
 using NandoHost.Core;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.App;
 
@@ -46,8 +47,8 @@ public partial class MainWindow
         EditionBadge.Foreground = key == "Minecraft" ? (Brush)new BrushConverter().ConvertFromString("#C8D2B2")! : (Brush)FindResource("Muted");
         GameWorkspace.Background = key == "Minecraft" ? Brushes.Transparent : new SolidColorBrush((Color)ColorConverter.ConvertFromString(key == "Calamity" ? "#1D1722" : "#111E36"));
         SidebarNote.Background = key == "Minecraft" ? (Brush)FindResource("DirtBrush") : (Brush)FindResource("Surface");
-        SidebarNoteTitle.Text = key == "Minecraft" ? "DESDE A PRIMEIRA CABANA." : key == "Calamity" ? "UM NOVO DESAFIO ESPERA." : "DO PRIMEIRO ABRIGO AO HARDMODE.";
-        HeroTitle.Text = key == "Minecraft" ? "CADA MUNDO TEM\nUMA HISTÓRIA." : key == "Calamity" ? "Uma nova jornada.\nUm desafio maior." : "Cada mundo tem\numa história.";
+        LocalizedUi.Set(SidebarNoteTitle, "Text", () => key == "Minecraft" ? Tr("DESDE A PRIMEIRA CABANA.") : key == "Calamity" ? Tr("UM NOVO DESAFIO ESPERA.") : Tr("DO PRIMEIRO ABRIGO AO HARDMODE."));
+        LocalizedUi.Set(HeroTitle, "Text", () => key == "Minecraft" ? Tr("CADA MUNDO TEM\nUMA HISTÓRIA.") : key == "Calamity" ? Tr("Uma nova jornada.\nUm desafio maior.") : Tr("Cada mundo tem\numa história."));
         var buttons = new[] { DashboardNav, PacksNav, NetworkNav, SettingsNav };
         for (var i = 0; i < buttons.Length; i++)
         {
@@ -64,37 +65,37 @@ public partial class MainWindow
         ImportTmodsButton.IsEnabled = CanEditTerrariaMods;
         RemoveTmodButton.IsEnabled = CanEditTerrariaMods && TerrariaModsList.SelectedItem is TerrariaMod;
         if (!ReferenceEquals(TerrariaModsList.ItemsSource, selected.Mods)) TerrariaModsList.ItemsSource = selected.Mods;
-        TerrariaModsHeading.Text = selected.IsTModLoader ? "MODS · " + selected.Name : "ESTE PERFIL É VANILLA";
-        TerrariaModsHelp.Text = !selected.IsTModLoader ? "Crie um perfil Calamity ou personalizado acima para instalar tModLoader. O mundo Vanilla será preservado."
-            : CanEditTerrariaMods ? "Importe os mods antes do primeiro início. O nome interno e a integridade de cada .tmod serão conferidos."
-            : busy || runner.IsActive || tunnel.IsActive ? "Conclua a tarefa e pare o servidor e o agente para editar os mods."
-            : "Este mundo já foi criado. Crie outro perfil para trocar os mods e preservar esta aventura.";
+        LocalizedUi.Set(TerrariaModsHeading, "Text", () => selected.IsTModLoader ? "MODS · " + selected.Name : Tr("ESTE PERFIL É VANILLA"));
+        LocalizedUi.Set(TerrariaModsHelp, "Text", () => !selected.IsTModLoader ? Tr("Crie um perfil Calamity ou personalizado acima para instalar tModLoader. O mundo Vanilla será preservado.")
+            : CanEditTerrariaMods ? Tr("Importe os mods antes do primeiro início. O nome interno e a integridade de cada .tmod serão conferidos.")
+            : busy || runner.IsActive || tunnel.IsActive ? Tr("Conclua a tarefa e pare o servidor e o agente para editar os mods.")
+            : Tr("Este mundo já foi criado. Crie outro perfil para trocar os mods e preservar esta aventura."));
         var calamity = selected.Mods.Any(m => m.Name == "CalamityMod"); var music = selected.Mods.Any(m => m.Name == "CalamityModMusic");
-        TerrariaModsStatus.Text = selected.IsTModLoader && selected.TerrariaPreset == "Calamity"
-            ? (calamity ? "✓ Calamity Mod" : "Falta Calamity Mod") + "  ·  " + (music ? "✓ Calamity Mod Music" : "Falta Calamity Mod Music")
-            : selected.IsTModLoader ? selected.Mods.Count + " mod(s) importado(s)." : "Nenhum mod é carregado em servidores Vanilla.";
+        LocalizedUi.Set(TerrariaModsStatus, "Text", () => selected.IsTModLoader && selected.TerrariaPreset == "Calamity"
+            ? (calamity ? "✓ Calamity Mod" : Tr("Falta Calamity Mod")) + "  ·  " + (music ? "✓ Calamity Mod Music" : Tr("Falta Calamity Mod Music"))
+            : selected.IsTModLoader ? selected.Mods.Count + Tr(" mod(s) importado(s).") : Tr("Nenhum mod é carregado em servidores Vanilla."));
     }
     private async void CreateModdedClick(object sender, RoutedEventArgs e)
     {
         if (selected?.IsTerraria != true || busy || runner.IsActive || tunnel.IsActive || sender is not Button { Tag: string preset }) return;
         var p = NewTerrariaProfile(); p.Engine = "tModLoader"; p.TerrariaPreset = preset;
-        p.Name = preset == "Calamity" ? "Meu Calamity " + (profiles.Count(x => x.IsTModLoader && x.TerrariaPreset == "Calamity") + 1) : "Meu Terraria com mods " + (profiles.Count(x => x.IsTModLoader) + 1);
+        p.Name = preset == "Calamity" ? Tr("Meu Calamity ") + (profiles.Count(x => x.IsTModLoader && x.TerrariaPreset == "Calamity") + 1) : Tr("Meu Terraria com mods ") + (profiles.Count(x => x.IsTModLoader) + 1);
         p.MinecraftVersion = "v2026.08.3.0"; p.LaunchJar = "engine/tModLoader.dll";
         profiles.Add(p); store.Save(profiles); ServerList.SelectedItem = p; Navigate(3);
         await ReloadVersionsAsync();
-        SetStatus("Novo perfil tModLoader. Configure o mundo, baixe o servidor e importe os .tmod em Mods antes de ligar.");
+        SetStatus(() => Tr("Novo perfil tModLoader. Configure o mundo, baixe o servidor e importe os .tmod em Mods antes de ligar."));
     }
     private async void ImportTmodsClick(object sender, RoutedEventArgs e)
     {
         if (!CanEditTerrariaMods) return;
-        var dialog = new OpenFileDialog { Filter = "Mods tModLoader (*.tmod)|*.tmod", Multiselect = true, Title = "Selecione os mods e suas dependências" };
+        var dialog = new OpenFileDialog { Filter = Tr("Mods tModLoader (*.tmod)|*.tmod"), Multiselect = true, Title = Tr("Selecione os mods e suas dependências") };
         if (dialog.ShowDialog(this) != true) return;
         var profile = selected!;
         await Guard(async ct =>
         {
             var mods = await Task.Run(() => { ct.ThrowIfCancellationRequested(); return TModLoaderModule.ImportMods(profile, store.ServerRoot(profile), dialog.FileNames); }, ct);
             profile.Mods = mods; TModLoaderModule.WriteEnabled(profile, store.ServerRoot(profile)); store.Save(profiles);
-            SetStatus(mods.Count + " mod(s) preparados neste perfil. O tModLoader verificará compatibilidade e dependências ao iniciar.");
+            SetStatus(() => mods.Count + Tr(" mod(s) preparados neste perfil. O tModLoader verificará compatibilidade e dependências ao iniciar."));
         }, false);
     }
     private void RemoveTmodClick(object sender, RoutedEventArgs e)
@@ -107,7 +108,7 @@ public partial class MainWindow
             selected.Mods = selected.Mods.Where(m => m.Name != mod.Name).ToList();
             TModLoaderModule.WriteEnabled(selected, store.ServerRoot(selected)); store.Save(profiles); RefreshTerrariaMods();
         }
-        catch (Exception ex) { SetStatus("Não foi possível remover o mod: " + ex.Message); }
+        catch (Exception ex) { SetStatus(() => Tr("Não foi possível remover o mod: ") + ex.Message); }
     }
     private void TerrariaModSelected(object sender, SelectionChangedEventArgs e)
     {

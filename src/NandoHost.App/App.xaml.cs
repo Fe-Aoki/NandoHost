@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.App;
 
@@ -36,7 +37,7 @@ public partial class App : Application
             instance = new Mutex(true, "Local\\NandoHost-" + identity, out var created);
             if (!created)
             {
-                MessageBox.Show("O NandoHost já está aberto nesta pasta. Procure o ícone na bandeja do Windows.", "NandoHost", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Tr("O NandoHost já está aberto nesta pasta. Procure o ícone na bandeja do Windows."), "NandoHost", MessageBoxButton.OK, MessageBoxImage.Information);
                 instance.Dispose(); instance = null; Shutdown(); return;
             }
         }
@@ -94,6 +95,11 @@ public partial class App : Application
                     File.WriteAllText(target + ".resize.txt", window.PreviewResizeChecks());
                 if (Array.IndexOf(e.Args, "--library-check") >= 0)
                     File.WriteAllText(target + ".library.txt", window.PreviewLibraryChecks(Array.IndexOf(e.Args, "--hover-cover") >= 0));
+                if (Array.IndexOf(e.Args, "--language-check") >= 0)
+                    File.WriteAllText(target + ".language.txt", window.PreviewLanguageChecks());
+                var languageArg = Array.IndexOf(e.Args, "--language");
+                if (languageArg >= 0 && e.Args.Length > languageArg + 1) window.PreviewLanguage(e.Args[languageArg + 1]);
+                window.UpdateLayout();
                 window.RenderPreview(target);
                 File.WriteAllText(target + ".ok", "WPF loaded; native top inset=0 px; layout rendered; embedded font and Portuguese accents verified. Font: " + glyph.FontUri);
                 window.Close();

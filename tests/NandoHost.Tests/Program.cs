@@ -710,6 +710,84 @@ if (args.Contains("--online"))
         var version = await ServerProcess.CheckJavaAsync("java"); Check(version >= 21, "Installed Java recognized");
     });
 }
+await Test("localization: preference defaults, persistence and corrupt-file fallback", () =>
+{
+    var settingsRoot = Path.Combine(root, "ui-preferences");
+    Directory.CreateDirectory(settingsRoot);
+    Check(UiPreferencesStore.Load(settingsRoot, "pt-PT") == "pt-BR", "Portuguese system default");
+    Check(UiPreferencesStore.Load(settingsRoot, "de-DE") == "en-US", "English fallback");
+    UiPreferencesStore.Save(settingsRoot, "en-US");
+    Check(UiPreferencesStore.Load(settingsRoot, "pt-BR") == "en-US", "Saved preference survives reload");
+    UiPreferencesStore.Save(settingsRoot, "pt-BR");
+    Check(UiPreferencesStore.Load(settingsRoot, "en-US") == "pt-BR", "Both languages persist");
+    File.WriteAllText(Path.Combine(settingsRoot, "ui-settings.json"), "{broken");
+    Check(UiPreferencesStore.Load(settingsRoot, "pt-BR") == "pt-BR", "Corrupt settings fall back");
+    File.WriteAllText(Path.Combine(settingsRoot, "ui-settings.json"), "{\"Language\":\"unsupported\"}");
+    Check(UiPreferencesStore.Load(settingsRoot, "en-US") == "en-US", "Unsupported stored language ignored");
+    Check(!Directory.GetFiles(settingsRoot, "*.tmp").Any(), "Atomic writes leave no temp file");
+    return Task.CompletedTask;
+});
+await Test("localization: translations, format placeholders and numeric culture", () =>
+{
+    var previous = Localizer.CultureCode;
+    var numericCulture = System.Globalization.CultureInfo.CurrentCulture.Name;
+    try
+    {
+        Localizer.SetCulture("en-US");
+        Check(Localizer.Tr("Configurações") == "Settings", "English label");
+        Check(Localizer.TrFormat("Java {0} detectado. Atende ao mínimo de Java {1} deste perfil.", 21, 17)
+            == "Java 21 detected. Meets this profile's Java 17 minimum.", "Formatted parameters");
+        foreach (var pair in Localizer.EnglishCatalog)
+        {
+            var pattern = @"(?<!\{)\{(\d+)(?:[^}]*)\}(?!\})";
+            string Placeholders(string value) => string.Join(",", System.Text.RegularExpressions.Regex.Matches(value, pattern).Select(m => m.Groups[1].Value).Order());
+            Check(Placeholders(pair.Key) == Placeholders(pair.Value), "Placeholder mismatch");
+        }
+        Check(Localizer.Tr("say Olá friends") == "say Olá friends", "Unknown text is untouched");
+        Check(System.Globalization.CultureInfo.CurrentCulture.Name == numericCulture, "Language does not change numeric parsing");
+        Localizer.SetCulture("pt-BR");
+        Check(Localizer.Tr("Configurações") == "Configurações", "Portuguese restored");
+    }
+    finally { Localizer.SetCulture(previous); }
+    return Task.CompletedTask;
+});
+await Test("localization: profiles, command tokens and raw logs remain unchanged", () =>
+{
+    var previous = Localizer.CultureCode;
+    var name = new ServerProfile { Name = "Meu servidor", WorldName = "Meu mundo" };
+    var serialized = JsonSerializer.Serialize(name);
+    try
+    {
+        foreach (var language in new[] { "en-US", "pt-BR", "en-US" })
+        {
+            Localizer.SetCulture(language);
+            Check(JsonSerializer.Serialize(name) == serialized, "Profile data was translated");
+            var suggestion = CommandAssist.Suggest("wh", 2).First();
+            Check(suggestion.Text == "whitelist ", "Command token was translated");
+            Check(suggestion.Description.StartsWith(language == "en-US" ? "Manages who can join" : "Gerencia quem pode entrar"), "Descriptions follow language");
+            Check(new LogEntry(DateTime.Now, "Configurações / Settings / Olá").Text == "Configurações / Settings / Olá", "Raw server log changed");
+        }
+    }
+    finally { Localizer.SetCulture(previous); }
+    return Task.CompletedTask;
+});
+await Test("localization: validation stays enforced with English errors", () =>
+{
+    var previous = Localizer.CultureCode;
+    try
+    {
+        Localizer.SetCulture("en-US");
+        try { Downloads.ValidateUri(new Uri("http://localhost/unsafe")); throw new Exception("Unsafe download allowed"); }
+        catch (InvalidDataException error) { Check(error.Message.StartsWith("Download blocked:"), "Error translated"); }
+        Reject(() => SafePaths.Inside(root, "../escape"));
+        var rejected = false;
+        try { UiPreferencesStore.Save(Path.Combine(root, "ui-preferences"), "fr-FR"); }
+        catch (ArgumentException) { rejected = true; }
+        Check(rejected, "Unsupported language rejected");
+    }
+    finally { Localizer.SetCulture(previous); }
+    return Task.CompletedTask;
+});
 results.Add($"{results.Count} checks, {failures} failures");
 File.WriteAllLines(Path.Combine(root, "test-results.txt"), results);
 Console.WriteLine(results[^1]);

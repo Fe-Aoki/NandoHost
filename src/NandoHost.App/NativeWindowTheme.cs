@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using static NandoHost.Core.Localizer;
 
 namespace NandoHost.App;
 
@@ -53,9 +54,9 @@ internal static class NativeWindowTheme
     internal static int ClientTopInset(Window window)
     {
         var handle = new WindowInteropHelper(window).Handle;
-        if (!GetWindowRect(handle, out var outer)) throw new InvalidOperationException("Não foi possível verificar a moldura da janela.");
+        if (!GetWindowRect(handle, out var outer)) throw new InvalidOperationException(Tr("Não foi possível verificar a moldura da janela."));
         var client = new NativePoint();
-        if (!ClientToScreen(handle, ref client)) throw new InvalidOperationException("Não foi possível verificar a área de desenho da janela.");
+        if (!ClientToScreen(handle, ref client)) throw new InvalidOperationException(Tr("Não foi possível verificar a área de desenho da janela."));
         return client.Y - outer.Top;
     }
 
