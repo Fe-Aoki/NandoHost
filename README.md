@@ -141,3 +141,7 @@ O repositório deve permanecer **privado** nesta fase. A licença de distribuiç
 ---
 
 <p align="center">NandoHost · Hospede no seu PC. Continue sua jornada.</p>
+
+## Apoie o projeto
+
+Se quiser apoiar o desenvolvimento do NandoHost, você pode contribuir pelo [GitHub Sponsors](https://github.com/sponsors/Fe-Aoki). O apoio é opcional.

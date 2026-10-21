@@ -143,3 +143,7 @@ NandoHost is an independent project and is not an official product of the games 
 ---
 
 <p align="center">NandoHost · Host on your PC. Continue your journey.</p>
+
+## Support the project
+
+You can support NandoHost development through [GitHub Sponsors](https://github.com/sponsors/Fe-Aoki). Sponsorship is optional.
