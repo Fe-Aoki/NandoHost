@@ -8,6 +8,11 @@
 <p align="center">Minecraft and Terraria servers in a native Windows application.</p>
 
 <p align="center">
+  <a href="https://github.com/sponsors/Fe-Aoki"><img alt="Support Fe-Aoki on GitHub Sponsors" src="https://img.shields.io/badge/Sponsor-Fe--Aoki-ea4aaa?logo=githubsponsors&amp;logoColor=white" /></a>
+</p>
+<p align="center"><sub>Voluntary support for NandoHost development.</sub></p>
+
+<p align="center">
   <img src="docs/images/badges/windows.svg" alt="Windows" />
   <img src="docs/images/badges/dotnet.svg" alt="C# · WPF · .NET 10" />
   <img src="docs/images/badges/version.svg" alt="Preview 0.9.1" />

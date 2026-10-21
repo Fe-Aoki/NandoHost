@@ -8,6 +8,11 @@
 <p align="center">Servidores de Minecraft e Terraria em um painel nativo para Windows.</p>
 
 <p align="center">
+  <a href="https://github.com/sponsors/Fe-Aoki"><img alt="Apoie Fe-Aoki no GitHub Sponsors" src="https://img.shields.io/badge/Sponsor-Fe--Aoki-ea4aaa?logo=githubsponsors&amp;logoColor=white" /></a>
+</p>
+<p align="center"><sub>Apoio voluntário ao desenvolvimento do NandoHost.</sub></p>
+
+<p align="center">
   <img src="docs/images/badges/windows.svg" alt="Windows" />
   <img src="docs/images/badges/dotnet.svg" alt="C# · WPF · .NET 10" />
   <img src="docs/images/badges/version.svg" alt="Prévia 0.9.1" />
