@@ -1,14 +1,24 @@
 <Window x:Class="NandoHost.App.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:loc="clr-namespace:NandoHost.App" xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="NandoHost" Icon="Assets/Icons/nandohost-red.ico" Style="{StaticResource {x:Type Window}}" Width="1280" Height="920" MinWidth="960" MinHeight="640" WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize">
+  <Window.Resources>
+    <Style x:Key="ChromeSurface" TargetType="Border">
+      <Setter Property="Background" Value="{DynamicResource SidebarSurface}"/>
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding Visibility, ElementName=GameHome}" Value="Visible">
+          <Setter Property="Background" Value="#0C1721"/>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+  </Window.Resources>
   <shell:WindowChrome.WindowChrome>
     <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False"/>
   </shell:WindowChrome.WindowChrome>
   <Border x:Name="WindowSurface" BorderThickness="0">
     <Grid>
       <Grid.RowDefinitions><RowDefinition Height="42"/><RowDefinition Height="*"/><RowDefinition Height="38"/></Grid.RowDefinitions>
-      <Border Grid.Row="0" Background="#202126" MouseLeftButtonDown="TitleDrag">
+      <Border x:Name="TitleSurface" Grid.Row="0" Style="{StaticResource ChromeSurface}" MouseLeftButtonDown="TitleDrag">
         <Grid Margin="18,0,4,0">
-          <ComboBox x:Name="LanguageBox" Width="150" Height="30" MinHeight="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="100,0,0,0" Padding="8,3" SelectedValuePath="Tag" SelectionChanged="LanguageSelectionChanged" AutomationProperties.Name="Idioma / Language" ToolTip="Idioma / Language"><ComboBoxItem Content="Português (Brasil)" Tag="pt-BR"/><ComboBoxItem Content="English" Tag="en-US"/></ComboBox><TextBlock Text="NandoHost" FontSize="10" Foreground="#B8B5A9" VerticalAlignment="Center"/>
+          <TextBlock Text="NandoHost" FontSize="10" Foreground="#B8B5A9" VerticalAlignment="Center"/>
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Style="{StaticResource Flat}" Content="—" Click="MinimizeClick" Padding="14,7" Background="Transparent" Margin="0" ToolTip="{loc:Translate Key=Text001}"/>
             <Button Style="{StaticResource Flat}" x:Name="MaximizeButton" Content="□" Click="MaximizeClick" Padding="14,7" Background="Transparent" Margin="0" ToolTip="{loc:Translate Key=Text002}"/>
@@ -32,7 +42,7 @@
               <Button x:Name="NetworkNav" Style="{StaticResource Nav}" Content="{loc:Translate Key=Text006}" Tag="2" Click="NavigateClick"/>
               <Button x:Name="SettingsNav" Style="{StaticResource Nav}" Content="{loc:Translate Key=Text007}" Tag="3" Click="NavigateClick"/>
             </StackPanel>
-            <StackPanel Grid.Row="2" Margin="4,32,0,12">
+            <StackPanel x:Name="ServerListHeading" Grid.Row="2" Margin="4,32,0,12">
               <TextBlock Text="{loc:Translate Key=Text008}" FontSize="10" Foreground="{DynamicResource Muted}"/>
               <TextBlock Text="{loc:Translate Key=Text009}" FontSize="10" Foreground="#938D7E" Margin="0,7,0,0"/>
             </StackPanel>
@@ -40,6 +50,7 @@
               <ListBox.ItemTemplate><DataTemplate><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="25"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Image Width="18" Height="20" VerticalAlignment="Top" Margin="0,2,7,0"><Image.Style><Style TargetType="Image"><Setter Property="Source" Value="{StaticResource MinecraftGameImage}"/><Style.Triggers><DataTrigger Binding="{Binding IsTerraria}" Value="True"><Setter Property="Source" Value="{StaticResource TerrariaGameImage}"/></DataTrigger></Style.Triggers></Style></Image.Style></Image><StackPanel Grid.Column="1"><TextBlock ToolTip="{Binding Name}" Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/><TextBlock FontSize="10" Foreground="{DynamicResource Muted}" Margin="0,5,0,0"><Run Text="{Binding EditionLabel, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding MinecraftVersion}"/></TextBlock></StackPanel></Grid></DataTemplate></ListBox.ItemTemplate>
             </ListBox>
             <StackPanel Grid.Row="4">
+              <ComboBox x:Name="GameLanguageBox" Height="36" MinHeight="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,0,6" Padding="8,3" SelectedValuePath="Tag" SelectionChanged="LanguageSelectionChanged" AutomationProperties.Name="Idioma / Language" ToolTip="Idioma / Language"><ComboBoxItem Content="Português (Brasil)" Tag="pt-BR"/><ComboBoxItem Content="English" Tag="en-US"/></ComboBox>
               <Button x:Name="NewButton" Content="{loc:Translate Key=Text010}" Click="NewServerClick" Margin="0,12,0,18"/>
               <Border x:Name="SidebarNote" BorderBrush="{DynamicResource CardBorder}" BorderThickness="1" Background="{StaticResource DirtBrush}" Padding="12" RenderOptions.EdgeMode="Aliased"><StackPanel><TextBlock x:Name="SidebarNoteTitle" Text="{loc:Translate Key=Text011}" FontFamily="Bahnschrift" FontSize="10" Foreground="#D7D2BC"/><TextBlock Text="{loc:Translate Key=Text012}" FontSize="11" Foreground="#C2B8A4" Margin="0,7,0,0"/></StackPanel></Border>
               <TextBlock Text="{loc:Translate Key=Text013}" FontSize="9" Foreground="#938D7E" Margin="4,15,0,0"/>
@@ -217,6 +228,11 @@
       </Grid>
       <Grid Grid.Row="1" x:Name="GameHome" Background="#07111A" Panel.ZIndex="10">
         <Grid.Resources>
+          <SolidColorBrush x:Key="InputSurface" Color="#09131C"/>
+          <SolidColorBrush x:Key="InputBorder" Color="#304450"/>
+          <SolidColorBrush x:Key="PopupSurface" Color="#10202D"/>
+          <SolidColorBrush x:Key="Muted" Color="#95ADBC"/>
+          <SolidColorBrush x:Key="Accent" Color="#E6B76C"/>
           <SolidColorBrush x:Key="TrackSurface" Color="#071019"/><SolidColorBrush x:Key="ThumbSurface" Color="#334E5F"/><SolidColorBrush x:Key="ThumbHover" Color="#658397"/>
           <Style x:Key="LibraryGame" TargetType="Button">
             <Setter Property="Foreground" Value="#E1E9ED"/><Setter Property="Background" Value="Transparent"/><Setter Property="BorderBrush" Value="Transparent"/><Setter Property="Margin" Value="0,0,0,3"/><Setter Property="Padding" Value="18,13"/><Setter Property="Cursor" Value="Hand"/>
@@ -247,13 +263,14 @@
         </Grid.Resources>
         <Grid.RowDefinitions><RowDefinition Height="76"/><RowDefinition Height="*"/></Grid.RowDefinitions>
         <Border Background="#0C1721" BorderBrush="#29404D" BorderThickness="0,0,0,1" Padding="26,0">
-          <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="205"/><ColumnDefinition Width="*"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions>
+          <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="205"/><ColumnDefinition Width="*"/><ColumnDefinition Width="185"/><ColumnDefinition Width="190"/></Grid.ColumnDefinitions>
             <TextBlock x:Name="HomeBrandName" FontFamily="Bahnschrift" FontSize="27" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="NoWrap"><Run Text="Nando" Foreground="#F1F1E9"/><Run Text="Host" Foreground="#E9BE7D"/></TextBlock>
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
               <Button x:Name="MinecraftGameButton" Style="{StaticResource LibraryGame}" Click="HomeSelectGameClick" Tag="Minecraft" MouseEnter="LibraryIconHover" MouseLeave="LibraryIconHover" AutomationProperties.Name="{loc:Translate Key=Text157}" Padding="13,12" Margin="0,0,8,0"><StackPanel Orientation="Horizontal"><Image Source="{StaticResource MinecraftGameImage}" Width="23" Height="23" Margin="0,0,9,0" RenderTransformOrigin="0.5,0.5"/><TextBlock Text="Minecraft" FontSize="13" VerticalAlignment="Center"/></StackPanel></Button>
               <Button x:Name="TerrariaGameButton" Style="{StaticResource LibraryGame}" Click="HomeSelectGameClick" Tag="Terraria" MouseEnter="LibraryIconHover" MouseLeave="LibraryIconHover" AutomationProperties.Name="{loc:Translate Key=Text158}" Padding="13,12" Margin="0"><StackPanel Orientation="Horizontal"><Image Source="{StaticResource TerrariaGameImage}" Width="23" Height="23" Margin="0,0,9,0" RenderTransformOrigin="0.5,0.5"/><TextBlock Text="Terraria" FontSize="13" VerticalAlignment="Center"/></StackPanel></Button>
             </StackPanel>
-            <Grid Grid.Column="2" VerticalAlignment="Center"><TextBox x:Name="HomeGameSearch" AutomationProperties.Name="{loc:Translate Key=Text159}" ToolTip="{loc:Translate Key=Text159}" Background="#09131C" BorderBrush="#304450" Foreground="#E1E9EF" FontSize="12" Padding="30,9,10,9" TextChanged="HomeGameSearchChanged" MaxLength="80"/><TextBlock Text="⌕" FontSize="20" Foreground="#91A5B1" Margin="9,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/><TextBlock Text="{loc:Translate Key=Text160}" Foreground="#8097A7" FontSize="11" Margin="32,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=HomeGameSearch}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock></Grid>
+            <ComboBox x:Name="LanguageBox" Grid.Column="2" Height="36" MinHeight="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,12,0" Padding="8,3" SelectedValuePath="Tag" SelectionChanged="LanguageSelectionChanged" AutomationProperties.Name="Idioma / Language" ToolTip="Idioma / Language"><ComboBoxItem Content="Português (Brasil)" Tag="pt-BR"/><ComboBoxItem Content="English" Tag="en-US"/></ComboBox>
+            <Grid Grid.Column="3" VerticalAlignment="Center"><TextBox x:Name="HomeGameSearch" AutomationProperties.Name="{loc:Translate Key=Text159}" ToolTip="{loc:Translate Key=Text159}" Background="#09131C" BorderBrush="#304450" Foreground="#E1E9EF" FontSize="12" Padding="30,9,10,9" TextChanged="HomeGameSearchChanged" MaxLength="80"/><TextBlock Text="⌕" FontSize="20" Foreground="#91A5B1" Margin="9,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/><TextBlock Text="{loc:Translate Key=Text160}" Foreground="#8097A7" FontSize="11" Margin="32,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=HomeGameSearch}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock></Grid>
           </Grid>
         </Border>
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -321,7 +338,7 @@
           <TextBlock Text="{loc:Translate Key=Text014}" FontFamily="Bahnschrift" FontSize="11" Foreground="#BDCCAD" HorizontalAlignment="Center"/>
         </StackPanel>
       </Grid>
-      <Border Grid.Row="2" Background="#202126" BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,1,0,0"><Grid Margin="18,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock x:Name="StatusText" Text="{loc:Translate Key=Text177}" Foreground="{DynamicResource Muted}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/><Button Style="{StaticResource Flat}" Grid.Column="1" x:Name="CancelButton" Content="{loc:Translate Key=Text178}" Click="CancelClick" Visibility="Collapsed" Padding="10,3" Background="Transparent" FontSize="11" Margin="10,3"/><TextBlock Grid.Column="2" x:Name="AppMemoryText" Text="{loc:Translate Key=Text179}" FontSize="10" Foreground="#A2AB8B" VerticalAlignment="Center" Margin="16,0,0,0"/></Grid></Border>
+      <Border x:Name="FooterSurface" Grid.Row="2" Style="{StaticResource ChromeSurface}" BorderBrush="{DynamicResource SidebarBorder}" BorderThickness="0,1,0,0"><Grid Margin="18,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock x:Name="StatusText" Text="{loc:Translate Key=Text177}" Foreground="{DynamicResource Muted}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/><Button Style="{StaticResource Flat}" Grid.Column="1" x:Name="CancelButton" Content="{loc:Translate Key=Text178}" Click="CancelClick" Visibility="Collapsed" Padding="10,3" Background="Transparent" FontSize="11" Margin="10,3"/><TextBlock Grid.Column="2" x:Name="AppMemoryText" Text="{loc:Translate Key=Text179}" FontSize="10" Foreground="#A2AB8B" VerticalAlignment="Center" Margin="16,0,0,0"/></Grid></Border>
     </Grid>
   </Border>
 </Window>

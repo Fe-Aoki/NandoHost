@@ -34,6 +34,10 @@ public partial class MainWindow
         WorkspaceContent.Margin = narrow ? new Thickness(18, 18, 18, 16) : new Thickness(30, 25, 30, 22);
         PageHeader.Margin = new Thickness(0, 0, 0, compact ? 12 : 20);
         SidebarNote.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
+        foreach (var navigation in new[] { DashboardNav, PacksNav, NetworkNav, SettingsNav })
+            navigation.Padding = new Thickness(14, compact ? 10 : 14, 14, compact ? 10 : 14);
+        ServerListHeading.Margin = new Thickness(4, compact ? 20 : 32, 0, 12);
+        NewButton.Margin = compact ? new Thickness(0, 6, 0, 8) : new Thickness(0, 12, 0, 18);
         HeroRow.Height = new GridLength(compact ? 142 : 190);
         HeroContent.Margin = compact ? new Thickness(24, 12, 0, 12) : new Thickness(28, 22, 0, 20);
         HeroEyebrow.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
@@ -71,6 +75,7 @@ public partial class MainWindow
             foreach (var size in new[] { new Size(960, 640), new Size(1100, 800), new Size(1280, 920), new Size(1600, 900) })
             {
                 Width = size.Width; Height = size.Height; Navigate(0); Settle();
+                Check(ServerList.ActualHeight >= 56, $"server list shows a complete profile at {size}: {ServerList.ActualHeight}");
                 Check(ConsolePanel.ActualHeight >= 200, $"console remains usable at {size}: {ConsolePanel.ActualHeight}");
                 Check(SecondaryActions.ActualWidth <= WorkspaceContent.ActualWidth, $"actions fit at {size}");
                 OverviewScroll.ScrollToBottom(); UpdateLayout();

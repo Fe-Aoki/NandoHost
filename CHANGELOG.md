@@ -1,5 +1,11 @@
 # Alterações
 
+## 0.9.1
+
+- Barra de título e rodapé integrados às cores da biblioteca, Minecraft, Terraria e Calamity.
+- Seletor de idioma no cabeçalho da biblioteca e na lateral de cada jogo, com seleção sincronizada.
+- Mais espaço para a lista de servidores em janelas pequenas.
+
 ## 0.9.0
 
 - Seleção de Português (Brasil) e English na barra superior, sem reiniciar o aplicativo.

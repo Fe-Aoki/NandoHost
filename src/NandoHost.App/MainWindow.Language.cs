@@ -14,7 +14,7 @@ public partial class MainWindow
 {
     private void LanguageSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (!uiReady || LanguageBox.SelectedValue is not string language || language == CultureCode) return;
+        if (!uiReady || sender is not ComboBox selector || selector.SelectedValue is not string language || language == CultureCode) return;
         try
         {
             UiPreferencesStore.Save(store.Root, language);
@@ -22,7 +22,7 @@ public partial class MainWindow
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         {
-            LanguageBox.SelectedValue = CultureCode;
+            LanguageBox.SelectedValue = GameLanguageBox.SelectedValue = CultureCode;
             MessageBox.Show(this, Tr("Não foi possível salvar o idioma. Verifique a permissão de escrita na pasta Data."), "NandoHost", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
@@ -30,7 +30,7 @@ public partial class MainWindow
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         if (!uiReady || closed) return;
-        LanguageBox.SelectedValue = CultureCode;
+        LanguageBox.SelectedValue = GameLanguageBox.SelectedValue = CultureCode;
         CommandPopup.IsOpen = false;
         // Refresh presentation only. Never load/save a profile or reload its fields.
         UpdateControls();
@@ -66,6 +66,14 @@ public partial class MainWindow
             if (!condition) throw new InvalidOperationException(label);
             report.AppendLine("PASS " + label);
         }
+        UpdateLayout();
+        Check(LanguageBox.IsDescendantOf(GameHome) && GameLanguageBox.IsDescendantOf(GameSidebar), "language selectors belong to library and game interface");
+        Check(!LanguageBox.IsDescendantOf(TitleSurface) && !GameLanguageBox.IsDescendantOf(TitleSurface), "title bar contains no language selector");
+        var expectedChrome = GameHome.Visibility == Visibility.Visible
+            ? "#FF0C1721" : ((System.Windows.Media.SolidColorBrush)FindResource("SidebarSurface")).Color.ToString();
+        Check(((System.Windows.Media.SolidColorBrush)TitleSurface.Background).Color.ToString() == expectedChrome
+            && ((System.Windows.Media.SolidColorBrush)FooterSurface.Background).Color.ToString() == expectedChrome,
+            "title bar and footer follow visible theme " + expectedChrome);
         var before = File.ReadAllText(Path.Combine(store.Root, "profiles.json"));
         var selectedId = selected!.Id;
         var page = Pages.SelectedIndex; var home = GameHome.Visibility;
@@ -83,9 +91,11 @@ public partial class MainWindow
             PackQuery.Text = "Calamity";
             CommandBox.IsEnabled = true; CommandBox.Text = "say Olá friends"; CommandBox.CaretIndex = 6;
             commandHistory.Remember("list"); var historyCount = commandHistory.Count;
+            var useSidebar = false;
             foreach (var code in new[] { "en-US", "pt-BR", "en-US", "pt-BR" })
             {
-                LanguageBox.SelectedValue = code; UpdateLayout();
+                (useSidebar ? GameLanguageBox : LanguageBox).SelectedValue = code; useSidebar = !useSidebar; UpdateLayout();
+                Check(LanguageBox.SelectedValue?.ToString() == code && GameLanguageBox.SelectedValue?.ToString() == code, "both interface selectors stay synchronized " + code);
                 Check(CultureCode == code && UiPreferencesStore.Load(store.Root) == code, "language switch persists " + code);
                 Check(NameBox.Text == "Meu servidor / My server" && WorldNameBox.Text == "Meu mundo" && WorldPasswordBox.Password == "private-language-fixture" && PackQuery.Text == "Calamity", "draft fields and password preserved " + code);
                 Check(CommandBox.Text == "say Olá friends" && CommandBox.CaretIndex == 6 && commandHistory.Count == historyCount, "command, caret and history preserved " + code);

@@ -10,7 +10,7 @@
 <p align="center">
   <img src="docs/images/badges/windows.svg" alt="Windows" />
   <img src="docs/images/badges/dotnet.svg" alt="C# · WPF · .NET 10" />
-  <img src="docs/images/badges/version.svg" alt="Preview 0.9.0" />
+  <img src="docs/images/badges/version.svg" alt="Preview 0.9.1" />
   <img src="docs/images/badges/private.svg" alt="Private repository" />
 </p>
 
@@ -27,7 +27,7 @@
 
 **NandoHost** brings installation, console access, mods, process metrics and backups together so you can host games on your own computer. You can play while the server is running, within your machine's available resources.
 
-**In development · version 0.9.0 · private repository.** The presentation follows the app's deep blue and gold palette and its game landscapes.
+**In development · version 0.9.1 · private repository.** The presentation follows the app's deep blue and gold palette and its game landscapes.
 
 ## Features
 
@@ -48,7 +48,7 @@ See [project status](docs/STATUS.md) for details and limitations. The supporting
 
 ## Languages
 
-**Português (Brasil)** and **English** are available from version **0.9.0**. Use the language selector in the top bar. Existing server and world names and game console output remain unchanged. See [localization details](docs/LOCALIZATION.md).
+**Português (Brasil)** and **English** are available from version **0.9.0**. Use the language selector in the library header or the game sidebar. Existing server and world names and game console output remain unchanged. See [localization details](docs/LOCALIZATION.md).
 
 ## Interface
 
@@ -69,7 +69,7 @@ The library includes a selected-game spotlight, interactive covers, search and s
 5. Start the server and follow the console. Configure a compatible mod profile before creating a modded world.
 6. For players outside your network, configure **Conexão externa** and share the correct address and port.
 
-The app requires Windows and .NET Desktop Runtime 10. Minecraft Java may require a compatible Java installation. Leave room for worlds, backups and downloads. Select Portuguese (Brazil) or English in the top bar. The choice is saved and takes effect without restarting; draft fields, passwords and commands are preserved.
+The app requires Windows and .NET Desktop Runtime 10. Minecraft Java may require a compatible Java installation. Leave room for worlds, backups and downloads. Select Portuguese (Brazil) or English in the library header or the game sidebar. The choice is saved and takes effect without restarting; draft fields, passwords and commands are preserved.
 
 The app creates **`Data` next to its executable**. To update, close the application and copy the previous `Data` folder into the new package's `app/Data`. Keep a backup and do not run two copies against the same data.
 
@@ -98,9 +98,11 @@ To build a distribution:
 .\scripts\Package.ps1
 ```
 
-Output: `dist/NandoHost-0.9.0-Windows.zip`. Packaging uses a fresh staging folder and does not include worlds, credentials or `Data`.
+Output: `dist/NandoHost-0.9.1-Windows.zip`. Packaging uses a fresh staging folder and does not include worlds, credentials or `Data`.
 
 ## Verification
+
+In **0.9.1**, window chrome follows the active theme and language selection moves into the interface. See [UI validation](docs/validation/INTERFACE-0.9.1.md).
 
 In **0.9.0**, **all 60 core checks passed**, including language preferences, formatting parameters, unchanged profiles and command tokens. UI checks also covered switching both ways without losing draft fields, passwords or command history. See [the validation report](docs/validation/LOCALIZATION-0.9.0.md).
 

@@ -1,6 +1,6 @@
 # Estado do projeto
 
-Versão atual: **0.9.0**, com seleção de português e inglês.
+Versão atual: **0.9.1**, com barras integradas ao tema e idioma na interface da biblioteca e dos jogos.
 
 Base inicial deste repositório: **NandoHost 0.8.9**. A organização em `src`, `tests`, `docs` e `scripts` não altera o formato dos perfis nem o comportamento dos jogos.
 

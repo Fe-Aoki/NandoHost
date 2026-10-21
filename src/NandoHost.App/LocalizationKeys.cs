@@ -16,7 +16,7 @@ internal static class LocalizationKeys
         ["Text010"] = "+  Novo servidor",
         ["Text011"] = "DESDE A PRIMEIRA CABANA.",
         ["Text012"] = "O mesmo esp\u00edrito de explorar. Um novo jeito de hospedar.",
-        ["Text013"] = "PR\u00c9VIA 0.9.0  \u00b7  WINDOWS",
+        ["Text013"] = "PR\u00c9VIA 0.9.1  \u00b7  WINDOWS",
         ["Text014"] = "PAINEL DO SERVIDOR",
         ["Text015"] = "Vamos criar seu mundo.",
         ["Text016"] = "Tudo o que voc\u00ea precisa para hospedar no seu PC.",

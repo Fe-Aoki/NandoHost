@@ -58,7 +58,7 @@ public partial class MainWindow : Window
         allowSmokeCatalog = smoke && liveCatalog;
         Localizer.SetCulture(smoke ? "pt-BR" : UiPreferencesStore.Load(dataFolder));
         InitializeComponent();
-        LanguageBox.SelectedValue = Localizer.CultureCode;
+        LanguageBox.SelectedValue = GameLanguageBox.SelectedValue = Localizer.CultureCode;
         PreviewKeyDown += EntryKeyDown;
         NativeWindowTheme.Attach(this);
         SizeChanged += ResponsiveSizeChanged;
@@ -118,7 +118,7 @@ public partial class MainWindow : Window
                 }
             };
         }
-        runner.Message(Tr("NandoHost 0.9.0 · o servidor e seus mundos ficam neste computador."));
+        runner.Message(Tr("NandoHost 0.9.1 · o servidor e seus mundos ficam neste computador."));
         runner.Message(Tr("Comece em Configurações: escolha a versão e instale o servidor."));
         runner.Message(Tr("Para amigos de fora da sua rede, configure Conexão externa."));
         if (!selected!.Installed) Navigate(3);

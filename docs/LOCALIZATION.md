@@ -4,7 +4,7 @@ Disponíveis a partir da versão **0.9.0**: Português (Brasil) e English.
 
 ## Usar
 
-O seletor fica na barra superior, ao lado do nome NandoHost. A troca é imediata e não exige reiniciar. No primeiro uso, o aplicativo usa português quando o idioma do sistema começa com pt; nos demais casos, usa inglês. Depois disso, prevalece a escolha salva.
+Desde a versão 0.9.1, o seletor fica no cabeçalho da biblioteca e na parte inferior da lateral dentro de cada jogo. Os dois controles mantêm a mesma seleção. A troca é imediata e não exige reiniciar. No primeiro uso, o aplicativo usa português quando o idioma do sistema começa com pt; nos demais casos, usa inglês. Depois disso, prevalece a escolha salva.
 
 A preferência fica em Data/ui-settings.json, separada dos perfis. O salvamento usa um arquivo temporário e substituição do arquivo final. Uma preferência ausente, inválida ou ilegível usa o idioma inicial do sistema. Se não for possível salvar uma nova escolha, o aplicativo mantém a anterior e informa o problema.
 

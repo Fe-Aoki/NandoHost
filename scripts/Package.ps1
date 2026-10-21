@@ -1,4 +1,4 @@
-param([string]$DotnetPath)
+﻿param([string]$DotnetPath)
 . (Join-Path $PSScriptRoot 'Common.ps1')
 $dotnet = Resolve-Dotnet $DotnetPath
 [xml]$project = Get-Content -LiteralPath (Join-Path $script:ProjectRoot 'src/NandoHost.App/NandoHost.App.csproj') -Raw
@@ -18,7 +18,7 @@ Copy-Item -LiteralPath (Join-Path $script:ProjectRoot 'THIRD_PARTY_NOTICES.md') 
 
 Instale o .NET Desktop Runtime 10 para Windows e abra app/NandoHost.exe.
 Os servidores e mundos ficam em app/Data, criado no primeiro uso.
-Escolha Português (Brasil) ou English na barra superior. A preferência fica salva em Data/ui-settings.json.
+Escolha Português (Brasil) ou English no cabeçalho da biblioteca ou na lateral dentro do jogo. A preferência fica salva em Data/ui-settings.json.
 Para atualizar, feche o programa e copie a pasta Data da versão anterior para app/Data.
 Guarde um backup antes da atualização. Não abra duas cópias usando os mesmos dados.
 

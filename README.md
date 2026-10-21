@@ -10,7 +10,7 @@
 <p align="center">
   <img src="docs/images/badges/windows.svg" alt="Windows" />
   <img src="docs/images/badges/dotnet.svg" alt="C# · WPF · .NET 10" />
-  <img src="docs/images/badges/version.svg" alt="Prévia 0.9.0" />
+  <img src="docs/images/badges/version.svg" alt="Prévia 0.9.1" />
   <img src="docs/images/badges/private.svg" alt="Repositório privado" />
 </p>
 
@@ -27,7 +27,7 @@
 
 O **NandoHost** reúne instalação, console, mods, métricas e backups para hospedar jogos no seu próprio computador. Você pode jogar enquanto o servidor está ligado, respeitando os recursos disponíveis na máquina.
 
-**Projeto em desenvolvimento · versão 0.9.0 · repositório privado.** A apresentação acompanha a identidade do aplicativo: azul profundo, dourado e as paisagens dos seus jogos.
+**Projeto em desenvolvimento · versão 0.9.1 · repositório privado.** A apresentação acompanha a identidade do aplicativo: azul profundo, dourado e as paisagens dos seus jogos.
 
 ## Recursos
 
@@ -42,7 +42,7 @@ Os mundos e os dados dos servidores ficam no computador do usuário. O painel n�
 
 ## Idiomas
 
-Selecione **Português (Brasil)** ou **English** na barra superior. A mudança não exige reiniciar, fica salva para a próxima abertura e preserva os campos que você está editando. Nomes de servidores e mundos, comandos e logs dos jogos mantêm o conteúdo original.
+Selecione **Português (Brasil)** ou **English** no cabeçalho da biblioteca ou na lateral dentro do jogo. A mudança não exige reiniciar, fica salva para a próxima abertura e preserva os campos que você está editando. Nomes de servidores e mundos, comandos e logs dos jogos mantêm o conteúdo original.
 
 Veja [como os idiomas funcionam](docs/LOCALIZATION.md).
 
@@ -96,6 +96,8 @@ Para gerar um ZIP limpo de distribuição:
 O pacote fica em `dist`. A montagem usa uma pasta temporária nova e copia somente executáveis do aplicativo, recursos necessários e avisos de terceiros. Não empacota `Data`, mundos ou credenciais.
 
 ## Verificação
+
+Na **0.9.1**, a barra da janela e o rodapé acompanham o tema ativo. O idioma passa a fazer parte da interface. Veja a [verificação visual](docs/validation/INTERFACE-0.9.1.md).
 
 Na **0.9.0**, os **60 testes do núcleo passaram sem falhas**, incluindo persistência do idioma, parâmetros, preservação de dados e comandos. Os testes de interface também conferiram a troca nos dois sentidos, campos e senhas em edição, histórico de comandos e bloqueios durante tarefas. Veja [o relatório](docs/validation/LOCALIZATION-0.9.0.md).
 
