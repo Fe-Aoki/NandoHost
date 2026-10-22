@@ -8,4 +8,4 @@ O núcleo contém validações de caminhos e arquivos compactados, restrição d
 
 O acesso externo usa um agente separado. Mantenha o painel e o console locais; não exponha interfaces de administração na internet. O programa não aceita a EULA do Minecraft por conta própria.
 
-Enquanto o projeto estiver privado, registre problemas de segurança no próprio repositório sem anexar credenciais reais ou dados de jogadores. Antes de torná-lo público, defina uma licença e um canal privado para comunicar vulnerabilidades.
+Para vulnerabilidades, use a opção privada "Report a vulnerability" na guia Security, se estiver disponível. Caso contrário, combine um canal privado com o mantenedor antes de enviar detalhes sensíveis. Não publique credenciais reais, dados de jogadores ou instruções de exploração em issues públicas.

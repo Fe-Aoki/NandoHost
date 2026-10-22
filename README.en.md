@@ -16,7 +16,7 @@
   <img src="docs/images/badges/windows.svg" alt="Windows" />
   <img src="docs/images/badges/dotnet.svg" alt="C# · WPF · .NET 10" />
   <img src="docs/images/badges/version.svg" alt="Preview 0.9.1" />
-  <img src="docs/images/badges/private.svg" alt="Private repository" />
+  <img src="docs/images/badges/public.svg" alt="Public repository" />
 </p>
 
 <p align="center">
@@ -32,7 +32,7 @@
 
 **NandoHost** brings installation, console access, mods, process metrics and backups together so you can host games on your own computer. You can play while the server is running, within your machine's available resources.
 
-**In development · version 0.9.1 · private repository.** The presentation follows the app's deep blue and gold palette and its game landscapes.
+**In development · version 0.9.1 · public repository.** The presentation follows the app's deep blue and gold palette and its game landscapes.
 
 ## Features
 
@@ -141,7 +141,7 @@ This is a recorded validation result, not a live CI status. Standard tests use t
 
 The next focus is clean Windows installation and upgrade testing, more real-game and mod testing, and performance, accessibility and security review. See [CONTRIBUTING.md](CONTRIBUTING.md), [architecture](docs/ARCHITECTURE.md), [security](SECURITY.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
-The repository remains **private**. No public source license has been assigned at this stage. Third-party licenses remain applicable. No publishing workflows or paid services are configured here.
+The repository is **public** and the project remains in development. No source license has been assigned at this stage. Third-party licenses remain applicable. No publishing workflows or paid services are configured here.
 
 NandoHost is an independent project and is not an official product of the games or services mentioned.
 

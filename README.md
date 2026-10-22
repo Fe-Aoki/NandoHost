@@ -16,7 +16,7 @@
   <img src="docs/images/badges/windows.svg" alt="Windows" />
   <img src="docs/images/badges/dotnet.svg" alt="C# · WPF · .NET 10" />
   <img src="docs/images/badges/version.svg" alt="Prévia 0.9.1" />
-  <img src="docs/images/badges/private.svg" alt="Repositório privado" />
+  <img src="docs/images/badges/public.svg" alt="Repositório público" />
 </p>
 
 <p align="center">
@@ -32,7 +32,7 @@
 
 O **NandoHost** reúne instalação, console, mods, métricas e backups para hospedar jogos no seu próprio computador. Você pode jogar enquanto o servidor está ligado, respeitando os recursos disponíveis na máquina.
 
-**Projeto em desenvolvimento · versão 0.9.1 · repositório privado.** A apresentação acompanha a identidade do aplicativo: azul profundo, dourado e as paisagens dos seus jogos.
+**Projeto em desenvolvimento · versão 0.9.1 · repositório público.** A apresentação acompanha a identidade do aplicativo: azul profundo, dourado e as paisagens dos seus jogos.
 
 ## Recursos
 
@@ -131,7 +131,7 @@ O resultado corresponde à verificação registrada, não a um status de CI em t
 
 O próximo foco é validar instalação e atualização em um Windows limpo, ampliar os testes com jogos e mods reais e revisar desempenho, acessibilidade e segurança. Uma sessão completa com Calamity ainda precisa ser validada.
 
-Para contribuir ou registrar problemas durante esta fase privada, veja [CONTRIBUTING.md](CONTRIBUTING.md).
+Para contribuir ou registrar problemas durante o desenvolvimento, veja [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Documentação
 
@@ -141,7 +141,7 @@ Para contribuir ou registrar problemas durante esta fase privada, veja [CONTRIBU
 - [Cuidados com dados e credenciais](SECURITY.md)
 - [Recursos e licenças de terceiros](THIRD_PARTY_NOTICES.md)
 
-O repositório deve permanecer **privado** nesta fase. A licença de distribuição do código do projeto ainda não foi definida. As licenças dos componentes de terceiros permanecem em vigor. Não há workflows de publicação ou serviços pagos configurados neste repositório.
+O repositório é **público** e o projeto continua em desenvolvimento. A licença de distribuição do código do projeto ainda não foi definida. As licenças dos componentes de terceiros permanecem em vigor. Não há workflows de publicação ou serviços pagos configurados neste repositório.
 
 ---
 

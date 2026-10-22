@@ -1,6 +1,6 @@
 # Desenvolvimento e relatos
 
-O NandoHost permanece privado durante o desenvolvimento. Use os acessos já concedidos ao repositório para registrar sugestões e problemas.
+O repositório do NandoHost é público e o projeto continua em desenvolvimento. Use as issues para registrar sugestões e problemas.
 
 ## Relatar um problema
 
