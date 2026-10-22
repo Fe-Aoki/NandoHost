@@ -23,7 +23,7 @@ Para atualizar, feche o programa e copie a pasta Data da versão anterior para a
 Guarde um backup antes da atualização. Não abra duas cópias usando os mesmos dados.
 
 Código e documentação de desenvolvimento: https://github.com/Fe-Aoki/NandoHost
-O repositório está privado durante o desenvolvimento.
+O repositório é público; o aplicativo continua em desenvolvimento.
 "@ | Set-Content -LiteralPath (Join-Path $packageRoot 'LEIA-ME.md') -Encoding UTF8
 if (Test-Path -LiteralPath (Join-Path $appDestination 'Data')) { throw 'Pacote contém dados de servidor.' }
 New-Item -ItemType Directory -Path $dist -Force | Out-Null
