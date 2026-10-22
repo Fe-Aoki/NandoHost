@@ -26,7 +26,7 @@ Base inicial deste repositório: **NandoHost 0.8.9**. A organização em `src`, 
 - O protótipo de túnel depende de configuração e disponibilidade do provedor. Não há assinatura paga contratada pelo aplicativo.
 - O histórico de validação inclui Terraria e tModLoader com ExampleMod reais. Uma sessão completa com Calamity ainda precisa ser validada.
 
-## Antes de uma versão pública
+## Antes de uma versão estável
 
 - Validar instalação e atualização em um Windows limpo.
 - Ampliar os testes com jogos reais, incluindo Calamity e pacotes maiores.
@@ -35,4 +35,4 @@ Base inicial deste repositório: **NandoHost 0.8.9**. A organização em `src`, 
 - Revisar procedência de todos os recursos e definir a licença do projeto.
 - Definir distribuição, assinatura do executável e canal de relato de problemas.
 
-Amigos, chat social e contas online permanecem fora do escopo atual. Não há mudança automática da visibilidade do repositório: torná-lo público depende de uma decisão explícita do responsável pelo projeto.
+Amigos, chat social e contas online permanecem fora do escopo atual. O responsável tornou o repositório público em 22/10/2026; a versão atual continua sendo uma prévia em desenvolvimento.
